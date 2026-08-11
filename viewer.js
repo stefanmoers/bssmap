@@ -37,6 +37,7 @@
   let selectedPhoto = null;
   let pendingObjectId = null;
   let pendingStatusMessage = "";
+  let pendingViewState = null;
   let mapIsOpening = false;
   let statusTimer = null;
   let editorEnabled = false;
@@ -216,6 +217,41 @@
     const bounds = image.imageToViewportRectangle(view.x, view.y, view.width, view.height);
     viewer.viewport.fitBounds(bounds, immediately);
     viewer.viewport.applyConstraints();
+  };
+
+  const captureViewState = () => {
+    const image = viewer.world.getItemAt(0);
+    const homeZoom = viewer.viewport.getHomeZoom();
+    const zoom = viewer.viewport.getZoom(true);
+    if (!image || !currentMap || !Number.isFinite(homeZoom) || homeZoom <= 0
+        || !Number.isFinite(zoom) || zoom <= 0) {
+      return null;
+    }
+
+    const center = image.viewportToImageCoordinates(viewer.viewport.getCenter(true));
+    return {
+      centerX: Math.min(1, Math.max(0, center.x / currentMap.width)),
+      centerY: Math.min(1, Math.max(0, center.y / currentMap.height)),
+      zoomRatio: zoom / homeZoom
+    };
+  };
+
+  const applyViewState = (viewState) => {
+    const image = viewer.world.getItemAt(0);
+    const homeZoom = viewer.viewport.getHomeZoom();
+    if (!image || !currentMap || !viewState || !Number.isFinite(homeZoom) || homeZoom <= 0) {
+      return false;
+    }
+
+    const center = image.imageToViewportCoordinates(
+      viewState.centerX * currentMap.width,
+      viewState.centerY * currentMap.height
+    );
+    viewer.viewport.panTo(center, true);
+    viewer.viewport.zoomTo(homeZoom * viewState.zoomRatio, center, true);
+    viewer.viewport.panTo(center, true);
+    viewer.viewport.applyConstraints();
+    return true;
   };
 
   const focusObjectOnMap = (object) => {
@@ -476,13 +512,14 @@
     editorClose.href = `?${params.toString()}`;
   };
 
-  const openMap = (map, { objectId = null, statusMessage = "" } = {}) => {
+  const openMap = (map, { objectId = null, statusMessage = "", viewState = null } = {}) => {
     removeObjectMarkers();
     resetEditorPoint();
     currentMap = map;
     setCurrentObjects();
     pendingObjectId = objectId;
     pendingStatusMessage = statusMessage;
+    pendingViewState = viewState;
     mapIsOpening = true;
     viewerElement.setAttribute("aria-busy", "true");
     viewerElement.setAttribute("aria-label", `Zoombare ${map.name} des Blausteinsees`);
@@ -497,6 +534,8 @@
     if (!map || mapIsOpening) {
       return;
     }
+
+    const viewState = currentMap?.id === map.id ? null : captureViewState();
 
     const requestedObject = objectId ? objectById.get(objectId) : null;
     const objectIsAvailable = Boolean(requestedObject && positionFor(requestedObject, map.id));
@@ -533,7 +572,7 @@
     if (historyMode !== "none") {
       writeUrlState(map.id, nextObjectId, historyMode);
     }
-    openMap(map, { objectId: nextObjectId, statusMessage: nextStatus });
+    openMap(map, { objectId: nextObjectId, statusMessage: nextStatus, viewState });
   };
 
   const toggleFullScreen = async () => {
@@ -715,7 +754,11 @@
     viewerElement.setAttribute("aria-busy", "false");
     mapIsOpening = false;
     updateMapControls();
-    goToDefaultView(true);
+    const viewState = pendingViewState;
+    pendingViewState = null;
+    if (!applyViewState(viewState)) {
+      goToDefaultView(true);
+    }
     addObjectMarkers();
     updateMarkerAppearance();
 
@@ -724,7 +767,7 @@
     pendingObjectId = null;
     pendingStatusMessage = "";
     if (requestedObjectId) {
-      selectObject(requestedObjectId, { updateUrl: false });
+      selectObject(requestedObjectId, { focusMap: !viewState, updateUrl: false });
     }
     updateEditorCloseLink();
     if (statusMessage) {

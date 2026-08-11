@@ -13,7 +13,8 @@ Verfügbar sind:
 
 Der Umschalter lädt die jeweilige DZI-Quelle ohne vollständigen Seitenreload.
 Marker, Suche, Detailinformationen und Fotos werden automatisch auf die Ziele
-der aktiven Karte eingeschränkt.
+der aktiven Karte eingeschränkt. Der aktuelle Kartenausschnitt und die
+Zoomstufe bleiben beim Wechsel relativ zur jeweiligen Gesamtkarte erhalten.
 
 ## Lokal starten
 

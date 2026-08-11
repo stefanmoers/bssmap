@@ -94,9 +94,12 @@ Dupliziere Name, Tiefe, Beschreibung und Fotos nicht für jede Karte.
 
 Beim Umschalten der Karten soll nach Möglichkeit:
 
-- das ausgewählte Objekt auf der Zielkarte erneut fokussiert werden,
-- andernfalls eine verständliche Statusmeldung erscheinen und die Zielkarte in
-  ihrer Standardansicht geöffnet werden,
+- der aktuelle Mittelpunkt und die Zoomstufe relativ zur Gesamtkarte erhalten
+  bleiben,
+- die Detailansicht eines ausgewählten Objekts geöffnet bleiben, wenn das
+  Objekt auf der Zielkarte vorhanden ist, ohne den übernommenen Ausschnitt zu
+  verändern,
+- andernfalls eine verständliche Statusmeldung erscheinen,
 - die Karten-ID zusätzlich über `?map=<id>` verlinkbar sein,
 - ein Objektlink sowohl `map` als auch `object` enthalten können.
 
