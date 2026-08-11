@@ -152,7 +152,7 @@
     });
   };
 
-  const updateMarkerScale = (zoom = viewer.viewport.getZoom(true)) => {
+  const updateMarkerAppearance = (zoom = viewer.viewport.getZoom(true)) => {
     const homeZoom = viewer.viewport.getHomeZoom();
     if (!Number.isFinite(zoom) || !Number.isFinite(homeZoom) || homeZoom <= 0) {
       return;
@@ -161,8 +161,11 @@
     const zoomRatio = Math.max(1, zoom / homeZoom);
     // Der sichtbare Kreis bleibt bewusst klein. Die deutlich größere
     // Schaltfläche in CSS erhält trotzdem eine zuverlässige Touch-Klickfläche.
-    const markerSize = Math.min(20, 7 + Math.log2(zoomRatio) * 6);
+    const zoomSteps = Math.log2(zoomRatio);
+    const markerSize = Math.min(20, 7 + zoomSteps * 6);
+    const markerOpacity = Math.min(1, 0.4 + zoomSteps * 0.15);
     viewerElement.style.setProperty("--marker-visual-size", `${markerSize.toFixed(1)}px`);
+    viewerElement.style.setProperty("--marker-fill-opacity", markerOpacity.toFixed(2));
   };
 
   const focusObjectOnMap = (object) => {
@@ -497,7 +500,7 @@
       objectById = new Map(objects.map((object) => [object.id, object]));
       renderObjectList();
       addObjectMarkers();
-      updateMarkerScale();
+      updateMarkerAppearance();
 
       const params = new URLSearchParams(window.location.search);
       const requestedObject = params.get("object");
@@ -519,7 +522,7 @@
     console.error("OpenSeadragon open-failed", event);
   });
 
-  viewer.addHandler("zoom", (event) => updateMarkerScale(event.zoom));
+  viewer.addHandler("zoom", (event) => updateMarkerAppearance(event.zoom));
 
   document.addEventListener("keydown", (event) => {
     const target = event.target;
