@@ -9,6 +9,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body,
 .map-shell,
@@ -472,8 +476,8 @@ h1 {
 
 .map-marker::before {
   box-sizing: border-box;
-  width: var(--marker-visual-size, 15px);
-  height: var(--marker-visual-size, 15px);
+  width: var(--marker-visual-size, 10px);
+  height: var(--marker-visual-size, 10px);
   border: 2px solid rgba(255, 255, 255, 0.94);
   background: #f3b61f;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
@@ -481,8 +485,8 @@ h1 {
 }
 
 .map-marker::after {
-  width: clamp(3px, calc(var(--marker-visual-size, 15px) * 0.21), 6px);
-  height: clamp(3px, calc(var(--marker-visual-size, 15px) * 0.21), 6px);
+  width: clamp(2px, calc(var(--marker-visual-size, 10px) * 0.21), 6px);
+  height: clamp(2px, calc(var(--marker-visual-size, 10px) * 0.21), 6px);
   background: #102338;
 }
 

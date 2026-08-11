@@ -74,6 +74,10 @@ Die Tauchziele stehen getrennt von der Karte in `data/objects.json`. Koordinaten
 beziehen sich auf das 5.750 x 8.117 Pixel große Kartenbild. Änderungen an der
 JSON-Datei benötigen keine Neuerzeugung der Kartenkacheln.
 
+Wenn die Karte für ein Ziel keine Tiefe nennt, wird `depthMeters` auf `null`
+gesetzt. Die Detailansicht zeigt dann „nicht angegeben“, ohne eine Tiefe zu
+erraten.
+
 Zum Erfassen einer neuen Position die Karte lokal mit `?edit=1` öffnen:
 
 ```text

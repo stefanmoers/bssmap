@@ -79,7 +79,9 @@ for (const object of objectData.objects) {
   }
   objectIds.add(object.id);
 
-  if (!object.name || !object.category || !Number.isFinite(object.depthMeters)) {
+  const validDepth = object.depthMeters === null
+    || (Number.isFinite(object.depthMeters) && object.depthMeters >= 0);
+  if (!object.name || !object.category || !validDepth) {
     throw new Error(`Unvollständiges Objekt: ${object.id}`);
   }
   if (!Number.isInteger(object.x) || !Number.isInteger(object.y)

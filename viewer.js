@@ -77,7 +77,9 @@
     viewer.viewport.applyConstraints();
   };
 
-  const formatDepth = (depthMeters) => `${depthFormatter.format(depthMeters)} m`;
+  const formatDepth = (depthMeters) => Number.isFinite(depthMeters)
+    ? `${depthFormatter.format(depthMeters)} m`
+    : "nicht angegeben";
 
   const normalize = (value) => value
     .toLocaleLowerCase("de-DE")
@@ -157,7 +159,7 @@
     }
 
     const zoomRatio = Math.max(1, zoom / homeZoom);
-    const markerSize = Math.min(28, 15 + Math.log2(zoomRatio) * 8);
+    const markerSize = Math.min(28, 10 + Math.log2(zoomRatio) * 9);
     viewerElement.style.setProperty("--marker-visual-size", `${markerSize.toFixed(1)}px`);
   };
 
@@ -254,7 +256,7 @@
   const renderObjectList = () => {
     const query = normalize(objectSearch.value.trim());
     const matchingObjects = objects
-      .filter((object) => normalize(`${object.name} ${object.category} ${object.depthMeters}`).includes(query))
+      .filter((object) => normalize(`${object.name} ${object.category} ${object.depthMeters ?? ""}`).includes(query))
       .sort((left, right) => left.name.localeCompare(right.name, "de"));
 
     objectCount.textContent = query
@@ -288,8 +290,8 @@
       const marker = document.createElement("button");
       marker.type = "button";
       marker.className = "map-marker";
-      marker.setAttribute("aria-label", `${object.name}, ${formatDepth(object.depthMeters)}`);
-      marker.title = `${object.name} · ${formatDepth(object.depthMeters)}`;
+      marker.setAttribute("aria-label", `${object.name}, Tiefe ${formatDepth(object.depthMeters)}`);
+      marker.title = `${object.name} · Tiefe ${formatDepth(object.depthMeters)}`;
 
       // Die native Klickbehandlung bleibt für Tastaturbedienung erhalten.
       // Zeiger- und Touch-Ereignisse innerhalb des Viewers übernimmt dagegen

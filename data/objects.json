@@ -6,13 +6,143 @@
   },
   "objects": [
     {
-      "id": "segelboot",
-      "name": "Segelboot",
-      "depthMeters": 26.5,
+      "id": "kutter",
+      "name": "Kutter",
+      "depthMeters": 38.5,
       "category": "Boot",
-      "x": 2815,
-      "y": 5460,
-      "description": "Das Segelboot ist auf der Tauchplatzkarte in 26,5 m Tiefe eingezeichnet.",
+      "x": 350,
+      "y": 720,
+      "description": "Auf der Tauchplatzkarte ist der Kutter in 38,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "betonbloecke",
+      "name": "Betonblöcke",
+      "depthMeters": 40.9,
+      "category": "Bauwerk",
+      "x": 2130,
+      "y": 1325,
+      "description": "Auf der Tauchplatzkarte sind die Betonblöcke in 40,9 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "rohrleitung",
+      "name": "Rohrleitung",
+      "depthMeters": 40.7,
+      "category": "Leitung",
+      "x": 1935,
+      "y": 1390,
+      "description": "Auf der Tauchplatzkarte ist die Rohrleitung in 40,7 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "kreuzpflock",
+      "name": "Kreuzpflock",
+      "depthMeters": 41,
+      "category": "Orientierungspunkt",
+      "x": 2085,
+      "y": 1590,
+      "description": "Auf der Tauchplatzkarte ist der Kreuzpflock in 41 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "blaustein",
+      "name": "Blaustein",
+      "depthMeters": 38,
+      "category": "Objekt",
+      "x": 3485,
+      "y": 1625,
+      "description": "Auf der Tauchplatzkarte ist der Blaustein in 38 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "boje-38m",
+      "name": "Boje",
+      "depthMeters": 38,
+      "category": "Boje",
+      "x": 3000,
+      "y": 3380,
+      "description": "Auf der Tauchplatzkarte ist diese Boje in 38 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "plastikstuhl",
+      "name": "Plastikstuhl",
+      "depthMeters": 37.5,
+      "category": "Möbel",
+      "x": 2860,
+      "y": 3560,
+      "description": "Auf der Tauchplatzkarte ist der Plastikstuhl in 37,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "seilkreuzung",
+      "name": "Seilkreuzung",
+      "depthMeters": 37.8,
+      "category": "Orientierungspunkt",
+      "x": 3000,
+      "y": 3515,
+      "description": "Auf der Tauchplatzkarte ist die Seilkreuzung in 37,8 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "doppelboje",
+      "name": "Doppelboje",
+      "depthMeters": 30,
+      "category": "Boje",
+      "x": 4835,
+      "y": 3335,
+      "description": "Auf der Tauchplatzkarte ist die Doppelboje in 30 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "loses-seil",
+      "name": "Loses Seil",
+      "depthMeters": null,
+      "category": "Hinweis",
+      "x": 3150,
+      "y": 3925,
+      "description": "Die Tauchplatzkarte weist an dieser Position auf ein loses Seil hin. Eine Tiefe ist nicht angegeben.",
+      "photos": []
+    },
+    {
+      "id": "willkommensschild",
+      "name": "Willkommensschild",
+      "depthMeters": 37.2,
+      "category": "Orientierungspunkt",
+      "x": 2500,
+      "y": 4025,
+      "description": "Auf der Tauchplatzkarte ist das Willkommensschild in 37,2 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "flamingos",
+      "name": "Flamingos",
+      "depthMeters": 35.5,
+      "category": "Figur",
+      "x": 505,
+      "y": 4220,
+      "description": "Auf der Tauchplatzkarte sind die Flamingos in 35,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "skelettkopf",
+      "name": "Skelettkopf",
+      "depthMeters": 36,
+      "category": "Figur",
+      "x": 1025,
+      "y": 4180,
+      "description": "Auf der Tauchplatzkarte ist der Skelettkopf in 36 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "zoo",
+      "name": "Zoo",
+      "depthMeters": 35.5,
+      "category": "Objekt",
+      "x": 1210,
+      "y": 4380,
+      "description": "Auf der Tauchplatzkarte ist der Zoo in 35,5 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -22,7 +152,7 @@
       "category": "Boot",
       "x": 2480,
       "y": 4680,
-      "description": "Das Kanu ist auf der Tauchplatzkarte in 36 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist das Kanu in 36 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -32,7 +162,17 @@
       "category": "Objekt",
       "x": 2660,
       "y": 4505,
-      "description": "Der Spiegel ist auf der Tauchplatzkarte in 36 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist der Spiegel in 36 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "mine",
+      "name": "Mine",
+      "depthMeters": 36,
+      "category": "Objekt",
+      "x": 3020,
+      "y": 4640,
+      "description": "Auf der Tauchplatzkarte ist die Mine in 36 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -42,7 +182,27 @@
       "category": "Bauwerk",
       "x": 3250,
       "y": 4580,
-      "description": "Das Habitat ist auf der Tauchplatzkarte in 35,3 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist das Habitat in 35,3 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "roehre-3",
+      "name": "Röhre 3",
+      "depthMeters": 35.3,
+      "category": "Röhre",
+      "x": 3405,
+      "y": 4650,
+      "description": "Auf der Tauchplatzkarte ist Röhre 3 in 35,3 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "roehre-2",
+      "name": "Röhre 2",
+      "depthMeters": 35.1,
+      "category": "Röhre",
+      "x": 3545,
+      "y": 4660,
+      "description": "Auf der Tauchplatzkarte ist Röhre 2 in 35,1 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -52,7 +212,7 @@
       "category": "Figur",
       "x": 3570,
       "y": 4710,
-      "description": "Der Weihnachtsmann ist auf der Tauchplatzkarte in 35 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist der Weihnachtsmann in 35 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -62,7 +222,7 @@
       "category": "Orientierungspunkt",
       "x": 4075,
       "y": 4685,
-      "description": "Die Notrufsäule ist auf der Tauchplatzkarte in 33,2 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist die Notrufsäule in 33,2 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -72,7 +232,47 @@
       "category": "Übungsobjekt",
       "x": 2620,
       "y": 4865,
-      "description": "Das Skelett-Gerüst ist auf der Tauchplatzkarte in 35,5 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist das Skelett-Gerüst in 35,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "roehre-1",
+      "name": "Röhre 1",
+      "depthMeters": 35.2,
+      "category": "Röhre",
+      "x": 3290,
+      "y": 4780,
+      "description": "Auf der Tauchplatzkarte ist Röhre 1 in 35,2 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "fahrrad-mit-taucheranzug",
+      "name": "Fahrrad mit Taucheranzug",
+      "depthMeters": 32.4,
+      "category": "Fahrzeug",
+      "x": 2190,
+      "y": 4870,
+      "description": "Auf der Tauchplatzkarte ist das Fahrrad mit Taucheranzug in 32,4 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "see-tower",
+      "name": "See-Tower",
+      "depthMeters": 28,
+      "category": "Bauwerk",
+      "x": 1795,
+      "y": 5000,
+      "description": "Auf der Tauchplatzkarte ist der See-Tower in 28 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "colatisch",
+      "name": "Colatisch",
+      "depthMeters": 30.3,
+      "category": "Möbel",
+      "x": 2340,
+      "y": 5150,
+      "description": "Auf der Tauchplatzkarte ist der Colatisch in 30,3 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -82,7 +282,7 @@
       "category": "Figur",
       "x": 3575,
       "y": 4955,
-      "description": "Der Polizist ist auf der Tauchplatzkarte in 34,4 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist der Polizist in 34,4 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -92,7 +292,17 @@
       "category": "Boot",
       "x": 3750,
       "y": 5050,
-      "description": "Das Kajak ist auf der Tauchplatzkarte in 33,7 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist das Kajak in 33,7 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "grillplatz",
+      "name": "Grillplatz",
+      "depthMeters": 33.2,
+      "category": "Möbel",
+      "x": 3800,
+      "y": 5170,
+      "description": "Auf der Tauchplatzkarte ist der Grillplatz in 33,2 m Tiefe eingezeichnet.",
       "photos": []
     },
     {
@@ -102,7 +312,385 @@
       "category": "Übungsobjekt",
       "x": 3570,
       "y": 5195,
-      "description": "Die Pyramide ist auf der Tauchplatzkarte in 31,5 m Tiefe eingezeichnet.",
+      "description": "Auf der Tauchplatzkarte ist die Pyramide in 31,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "etc-stein",
+      "name": "ETC-Stein",
+      "depthMeters": 32.8,
+      "category": "Objekt",
+      "x": 3210,
+      "y": 5270,
+      "description": "Auf der Tauchplatzkarte ist der ETC-Stein in 32,8 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "skelett",
+      "name": "Skelett",
+      "depthMeters": 30.5,
+      "category": "Figur",
+      "x": 2630,
+      "y": 5150,
+      "description": "Auf der Tauchplatzkarte ist das Skelett in 30,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "verkehrszeichen",
+      "name": "Verkehrszeichen",
+      "depthMeters": 27,
+      "category": "Orientierungspunkt",
+      "x": 2170,
+      "y": 5350,
+      "description": "Auf der Tauchplatzkarte ist das Verkehrszeichen in 27 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "dackel-26m",
+      "name": "Dackel",
+      "depthMeters": 26,
+      "category": "Figur",
+      "x": 2500,
+      "y": 5300,
+      "description": "Auf der Tauchplatzkarte ist dieser Dackel in 26 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "taucher-schild",
+      "name": "Taucher-Schild",
+      "depthMeters": 24,
+      "category": "Orientierungspunkt",
+      "x": 2220,
+      "y": 5490,
+      "description": "Auf der Tauchplatzkarte ist das Taucher-Schild in 24 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "segelboot",
+      "name": "Segelboot",
+      "depthMeters": 26.5,
+      "category": "Boot",
+      "x": 2815,
+      "y": 5460,
+      "description": "Auf der Tauchplatzkarte ist das Segelboot in 26,5 m Tiefe eingezeichnet.",
+      "photos": [
+        {
+          "src": "images/objects/segelboot/segelboot-01.jpg",
+          "alt": "Unterwasseraufnahme des Segelboots in 26,5 m Tiefe",
+          "caption": "Segelboot in 26,5 m Tiefe"
+        }
+      ]
+    },
+    {
+      "id": "w-zeichen",
+      "name": "W-Zeichen",
+      "depthMeters": 26.8,
+      "category": "Orientierungspunkt",
+      "x": 3400,
+      "y": 5570,
+      "description": "Auf der Tauchplatzkarte ist das W-Zeichen in 26,8 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "dackel-14m",
+      "name": "Dackel",
+      "depthMeters": 14,
+      "category": "Figur",
+      "x": 4900,
+      "y": 5220,
+      "description": "Auf der Tauchplatzkarte ist dieser Dackel in 14 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "puppe-mit-maske",
+      "name": "Puppe mit Maske",
+      "depthMeters": 17,
+      "category": "Figur",
+      "x": 810,
+      "y": 5390,
+      "description": "Auf der Tauchplatzkarte ist die Puppe mit Maske in 17 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "diorama",
+      "name": "Diorama",
+      "depthMeters": 21.6,
+      "category": "Objekt",
+      "x": 1920,
+      "y": 5440,
+      "description": "Auf der Tauchplatzkarte ist das Diorama in 21,6 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "plattform-21m",
+      "name": "Plattform",
+      "depthMeters": 21,
+      "category": "Plattform",
+      "x": 2205,
+      "y": 5575,
+      "description": "Auf der Tauchplatzkarte ist diese Plattform in 21 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "zelt",
+      "name": "Zelt",
+      "depthMeters": 14,
+      "category": "Objekt",
+      "x": 1800,
+      "y": 5730,
+      "description": "Auf der Tauchplatzkarte ist das Zelt in 14 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "weihnachtsdeko",
+      "name": "Weihnachtsdeko",
+      "depthMeters": 18,
+      "category": "Figur",
+      "x": 2115,
+      "y": 5660,
+      "description": "Auf der Tauchplatzkarte ist die Weihnachtsdeko in 18 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "anhaenger",
+      "name": "Anhänger",
+      "depthMeters": 22,
+      "category": "Fahrzeug",
+      "x": 2780,
+      "y": 5800,
+      "description": "Auf der Tauchplatzkarte ist der Anhänger in 22 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "schirm",
+      "name": "Schirm",
+      "depthMeters": 12.5,
+      "category": "Objekt",
+      "x": 1850,
+      "y": 5850,
+      "description": "Auf der Tauchplatzkarte ist der Schirm in 12,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "lkw-kabine-3",
+      "name": "LKW-Kabine 3",
+      "depthMeters": 15.8,
+      "category": "Fahrzeug",
+      "x": 2250,
+      "y": 5860,
+      "description": "Auf der Tauchplatzkarte ist LKW-Kabine 3 in 15,8 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "kessel",
+      "name": "Kessel",
+      "depthMeters": 18.8,
+      "category": "Objekt",
+      "x": 3020,
+      "y": 5960,
+      "description": "Auf der Tauchplatzkarte ist der Kessel in 18,8 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "fussgaenger-schild",
+      "name": "Fußgänger-Schild",
+      "depthMeters": 20,
+      "category": "Orientierungspunkt",
+      "x": 3035,
+      "y": 5985,
+      "description": "Auf der Karte ist das Schild „Fußgänger bitte andere Straßenseite benutzen“ in 20 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "muelleimer",
+      "name": "Mülleimer",
+      "depthMeters": 20.2,
+      "category": "Möbel",
+      "x": 3490,
+      "y": 5940,
+      "description": "Auf der Tauchplatzkarte ist der Mülleimer in 20,2 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "leitpfosten",
+      "name": "Leitpfosten",
+      "depthMeters": 20,
+      "category": "Orientierungspunkt",
+      "x": 3730,
+      "y": 5940,
+      "description": "Auf der Tauchplatzkarte sind die Leitpfosten in 20 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "streitwagen",
+      "name": "Streitwagen",
+      "depthMeters": 18.6,
+      "category": "Fahrzeug",
+      "x": 4050,
+      "y": 5910,
+      "description": "Auf der Tauchplatzkarte ist der Streitwagen in 18,6 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "toilette",
+      "name": "Toilette",
+      "depthMeters": 11.6,
+      "category": "Möbel",
+      "x": 2310,
+      "y": 6060,
+      "description": "Auf der Tauchplatzkarte ist die Toilette in 11,6 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "m-und-m",
+      "name": "M&M",
+      "depthMeters": 14,
+      "category": "Figur",
+      "x": 2630,
+      "y": 6200,
+      "description": "Auf der Tauchplatzkarte ist M&M in 14 m Tiefe eingezeichnet.",
+      "photos": [
+        {
+          "src": "images/objects/m-und-m/m-und-m-01.jpg",
+          "alt": "Unterwasseraufnahme der M&M-Figur in 14 m Tiefe",
+          "caption": "M&M in 14 m Tiefe"
+        }
+      ]
+    },
+    {
+      "id": "fahrrad",
+      "name": "Fahrrad",
+      "depthMeters": 14,
+      "category": "Fahrzeug",
+      "x": 2800,
+      "y": 6200,
+      "description": "Auf der Tauchplatzkarte ist das Fahrrad in 14 m Tiefe eingezeichnet.",
+      "photos": [
+        {
+          "src": "images/objects/fahrrad/fahrrad-01.jpg",
+          "alt": "Unterwasseraufnahme des Fahrrads in 14 m Tiefe",
+          "caption": "Fahrrad in 14 m Tiefe"
+        }
+      ]
+    },
+    {
+      "id": "lkw-kabine-2",
+      "name": "LKW-Kabine 2",
+      "depthMeters": 11,
+      "category": "Fahrzeug",
+      "x": 2580,
+      "y": 6310,
+      "description": "Auf der Tauchplatzkarte ist LKW-Kabine 2 in 11 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "tonnen",
+      "name": "Tonnen",
+      "depthMeters": 15.2,
+      "category": "Objekt",
+      "x": 3480,
+      "y": 6200,
+      "description": "Auf der Tauchplatzkarte sind die Tonnen in 15,2 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "waschtisch",
+      "name": "Waschtisch",
+      "depthMeters": 16,
+      "category": "Möbel",
+      "x": 3670,
+      "y": 6150,
+      "description": "Auf der Tauchplatzkarte ist der Waschtisch in 16 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "betonklotz",
+      "name": "Betonklotz",
+      "depthMeters": 13.6,
+      "category": "Bauwerk",
+      "x": 3930,
+      "y": 6250,
+      "description": "Auf der Tauchplatzkarte ist der Betonklotz in 13,6 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "plattform-9m",
+      "name": "Plattform",
+      "depthMeters": 9,
+      "category": "Plattform",
+      "x": 2480,
+      "y": 6420,
+      "description": "Auf der Tauchplatzkarte ist diese Plattform in 9 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "plattform-6m",
+      "name": "Plattform",
+      "depthMeters": 6,
+      "category": "Plattform",
+      "x": 2410,
+      "y": 6540,
+      "description": "Auf der Tauchplatzkarte ist diese Plattform in 6 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "lkw-1",
+      "name": "LKW 1",
+      "depthMeters": 10.5,
+      "category": "Fahrzeug",
+      "x": 2860,
+      "y": 6450,
+      "description": "Auf der Tauchplatzkarte ist LKW 1 in 10,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "taucher",
+      "name": "Taucher",
+      "depthMeters": 11,
+      "category": "Figur",
+      "x": 3070,
+      "y": 6420,
+      "description": "Auf der Tauchplatzkarte ist der Taucher in 11 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "weihnachtsbaum",
+      "name": "Weihnachtsbaum",
+      "depthMeters": 10.8,
+      "category": "Figur",
+      "x": 3480,
+      "y": 6470,
+      "description": "Auf der Tauchplatzkarte ist der Weihnachtsbaum in 10,8 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "plattform-2m",
+      "name": "Plattform",
+      "depthMeters": 2,
+      "category": "Plattform",
+      "x": 2850,
+      "y": 6900,
+      "description": "Auf der Tauchplatzkarte ist diese Plattform in 2 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "boje-2-5m",
+      "name": "Boje",
+      "depthMeters": 2.5,
+      "category": "Boje",
+      "x": 3100,
+      "y": 6950,
+      "description": "Auf der Tauchplatzkarte ist diese Boje in 2,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "einstieg",
+      "name": "Einstieg",
+      "depthMeters": null,
+      "category": "Einstieg",
+      "x": 3025,
+      "y": 7060,
+      "description": "Die Tauchplatzkarte kennzeichnet hier den Einstieg. Eine Tiefe ist nicht angegeben.",
       "photos": []
     }
   ]

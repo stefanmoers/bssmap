@@ -1,0 +1,175 @@
+diff --git a/styles.css b/styles.css
+index f3ac711..b304d37 100644
+--- a/styles.css
++++ b/styles.css
+@@ -450,39 +450,64 @@ h1 {
+ }
+ 
+ .map-marker {
+-  display: grid;
+-  width: 28px;
+-  height: 28px;
++  /* OpenSeadragon setzt display:block als Inline-Stil am Overlay. */
++  display: grid !important;
++  width: 36px;
++  height: 36px;
+   padding: 0;
+   place-items: center;
+-  border: 2px solid rgba(255, 255, 255, 0.94);
++  border: 0;
+   border-radius: 50%;
+-  background: #f3b61f;
+-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.52);
++  appearance: none;
++  background: transparent;
+   cursor: pointer;
+-  transition: transform 130ms ease, background-color 130ms ease;
+ }
+ 
++.map-marker::before,
+ .map-marker::after {
+-  width: 6px;
+-  height: 6px;
++  grid-area: 1 / 1;
+   border-radius: 50%;
+-  background: #102338;
+   content: "";
+ }
+ 
++.map-marker::before {
++  box-sizing: border-box;
++  width: var(--marker-visual-size, 15px);
++  height: var(--marker-visual-size, 15px);
++  border: 2px solid rgba(255, 255, 255, 0.94);
++  background: #f3b61f;
++  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
++  transition: width 100ms linear, height 100ms linear, transform 130ms ease, background-color 130ms ease;
++}
++
++.map-marker::after {
++  width: clamp(3px, calc(var(--marker-visual-size, 15px) * 0.21), 6px);
++  height: clamp(3px, calc(var(--marker-visual-size, 15px) * 0.21), 6px);
++  background: #102338;
++}
++
+ .map-marker:hover,
+ .map-marker:focus-visible,
+ .map-marker.is-selected {
+   z-index: 2;
++}
++
++.map-marker:hover::before,
++.map-marker:focus-visible::before,
++.map-marker.is-selected::before {
+   background: #8ed9ff;
+-  transform: scale(1.25);
++  transform: scale(1.2);
+ }
+ 
+-.map-marker.is-selected {
++.map-marker.is-selected::before {
+   box-shadow: 0 0 0 6px rgba(142, 217, 255, 0.24), 0 3px 12px rgba(0, 0, 0, 0.52);
+ }
+ 
++.map-marker:focus-visible {
++  outline: 2px solid #8ed9ff;
++  outline-offset: 0;
++}
++
+ .map-shell.panel-open .navigator {
+   right: 408px !important;
+ }
+@@ -729,8 +754,8 @@ h1 {
+   }
+ 
+   .map-marker {
+-    width: 34px;
+-    height: 34px;
++    width: 42px;
++    height: 42px;
+   }
+ 
+   .coordinate-editor {
+diff --git a/viewer.js b/viewer.js
+index 0832531..0bb4fb0 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -23,6 +23,7 @@
+   let objects = [];
+   let objectById = new Map();
+   const markers = new Map();
++  const markerTrackers = [];
+   let selectedObject = null;
+   let selectedPhoto = null;
+   let editorPoint = null;
+@@ -149,6 +150,17 @@
+     });
+   };
+ 
++  const updateMarkerScale = (zoom = viewer.viewport.getZoom(true)) => {
++    const homeZoom = viewer.viewport.getHomeZoom();
++    if (!Number.isFinite(zoom) || !Number.isFinite(homeZoom) || homeZoom <= 0) {
++      return;
++    }
++
++    const zoomRatio = Math.max(1, zoom / homeZoom);
++    const markerSize = Math.min(28, 15 + Math.log2(zoomRatio) * 8);
++    viewerElement.style.setProperty("--marker-visual-size", `${markerSize.toFixed(1)}px`);
++  };
++
+   const focusObjectOnMap = (object) => {
+     const bounds = viewer.viewport.imageToViewportRectangle(
+       object.x - 500,
+@@ -278,11 +290,35 @@
+       marker.className = "map-marker";
+       marker.setAttribute("aria-label", `${object.name}, ${formatDepth(object.depthMeters)}`);
+       marker.title = `${object.name} · ${formatDepth(object.depthMeters)}`;
++
++      // Die native Klickbehandlung bleibt für Tastaturbedienung erhalten.
++      // Zeiger- und Touch-Ereignisse innerhalb des Viewers übernimmt dagegen
++      // ein eigener OpenSeadragon-Tracker, damit der Karten-Tracker den Klick
++      // nicht als Beginn einer Verschiebegeste abfängt.
+       marker.addEventListener("click", (event) => {
++        if (event.detail !== 0) {
++          return;
++        }
+         event.stopPropagation();
+         selectObject(object.id);
+       });
+ 
++      const markerTracker = new OpenSeadragon.MouseTracker({
++        element: marker,
++        preProcessEventHandler: (event) => {
++          if (["pointerdown", "pointerup", "click"].includes(event.eventType)) {
++            event.stopPropagation = true;
++          }
++        },
++        clickHandler: (event) => {
++          if (event.quick) {
++            selectObject(object.id);
++          }
++        }
++      });
++      markerTracker.setTracking(true);
++      markerTrackers.push(markerTracker);
++
+       viewer.addOverlay({
+         element: marker,
+         location: viewer.viewport.imageToViewportCoordinates(object.x, object.y),
+@@ -457,6 +493,7 @@
+       objectById = new Map(objects.map((object) => [object.id, object]));
+       renderObjectList();
+       addObjectMarkers();
++      updateMarkerScale();
+ 
+       const params = new URLSearchParams(window.location.search);
+       const requestedObject = params.get("object");
+@@ -478,6 +515,8 @@
+     console.error("OpenSeadragon open-failed", event);
+   });
+ 
++  viewer.addHandler("zoom", (event) => updateMarkerScale(event.zoom));
++
+   document.addEventListener("keydown", (event) => {
+     const target = event.target;
+     if (target instanceof HTMLElement && (target.matches("input, textarea, select") || target.isContentEditable)) {
