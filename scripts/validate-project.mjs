@@ -7,36 +7,16 @@ const requiredFiles = [
   "index.html",
   "styles.css",
   "viewer.js",
+  "data/maps.json",
   "data/objects.json",
   "images/objects/README.md",
-  "map.dzi",
+  "maps/object-map/map.dzi",
+  "maps/detail-map/map.dzi",
   "vendor/openseadragon/openseadragon.min.js",
   "vendor/openseadragon/LICENSE.txt"
 ];
 
 await Promise.all(requiredFiles.map((file) => access(path.join(root, file))));
-
-const dzi = await readFile(path.join(root, "map.dzi"), "utf8");
-const numberAttribute = (name) => {
-  const match = dzi.match(new RegExp(`${name}="(\\d+)"`));
-  if (!match) {
-    throw new Error(`Attribut ${name} fehlt in map.dzi`);
-  }
-  return Number(match[1]);
-};
-
-const width = numberAttribute("Width");
-const height = numberAttribute("Height");
-const tileSize = numberAttribute("TileSize");
-const overlap = numberAttribute("Overlap");
-const formatMatch = dzi.match(/Format="([a-z0-9]+)"/i);
-
-if (!formatMatch || formatMatch[1].toLowerCase() !== "png") {
-  throw new Error("Für diese Demo werden PNG-Kacheln erwartet.");
-}
-
-const maxLevel = Math.ceil(Math.log2(Math.max(width, height)));
-let checkedTiles = 0;
 
 const html = await readFile(path.join(root, "index.html"), "utf8");
 const htmlIds = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
@@ -47,13 +27,15 @@ if (duplicateIds.length > 0) {
 
 const requiredIds = [
   "viewer",
+  "map-switcher",
   "objects-open",
   "object-panel",
   "object-search",
   "object-list",
   "object-detail",
   "photo-dialog",
-  "coordinate-editor"
+  "coordinate-editor",
+  "editor-close"
 ];
 for (const id of requiredIds) {
   if (!htmlIds.includes(id)) {
@@ -61,15 +43,148 @@ for (const id of requiredIds) {
   }
 }
 
-const objectData = JSON.parse(await readFile(path.join(root, "data/objects.json"), "utf8"));
-if (objectData.schemaVersion !== 1 || !Array.isArray(objectData.objects)) {
-  throw new Error("data/objects.json hat ein ungültiges Schema.");
+const isSafeRelativePath = (value) => typeof value === "string"
+  && value.length > 0
+  && !path.isAbsolute(value)
+  && !value.split(/[\\/]/).includes("..");
+
+const parseDzi = async (relativePath) => {
+  const dzi = await readFile(path.join(root, relativePath), "utf8");
+  const numberAttribute = (name) => {
+    const match = dzi.match(new RegExp(`${name}="(\\d+)"`));
+    if (!match) {
+      throw new Error(`Attribut ${name} fehlt in ${relativePath}`);
+    }
+    return Number(match[1]);
+  };
+  const formatMatch = dzi.match(/Format="([a-z0-9]+)"/i);
+  if (!formatMatch || formatMatch[1].toLowerCase() !== "png") {
+    throw new Error(`Für ${relativePath} werden PNG-Kacheln erwartet.`);
+  }
+  return {
+    width: numberAttribute("Width"),
+    height: numberAttribute("Height"),
+    tileSize: numberAttribute("TileSize"),
+    overlap: numberAttribute("Overlap")
+  };
+};
+
+const validateTilePyramid = async (map, dzi) => {
+  const maxLevel = Math.ceil(Math.log2(Math.max(dzi.width, dzi.height)));
+  const tileRoot = path.join(
+    root,
+    path.dirname(map.tileSource),
+    `${path.basename(map.tileSource, path.extname(map.tileSource))}_files`
+  );
+  let checkedTiles = 0;
+
+  for (let level = 0; level <= maxLevel; level += 1) {
+    const divisor = 2 ** (maxLevel - level);
+    const levelWidth = Math.ceil(dzi.width / divisor);
+    const levelHeight = Math.ceil(dzi.height / divisor);
+    const columns = Math.ceil(levelWidth / dzi.tileSize);
+    const rows = Math.ceil(levelHeight / dzi.tileSize);
+    const levelDirectory = path.join(tileRoot, String(level));
+    const actualNames = new Set(await readdir(levelDirectory));
+
+    for (let column = 0; column < columns; column += 1) {
+      for (let row = 0; row < rows; row += 1) {
+        const name = `${column}_${row}.png`;
+        if (!actualNames.delete(name)) {
+          throw new Error(`Kachel fehlt: ${path.relative(root, path.join(levelDirectory, name))}`);
+        }
+
+        const metadata = await sharp(path.join(levelDirectory, name)).metadata();
+        const baseWidth = Math.min(dzi.tileSize, levelWidth - column * dzi.tileSize);
+        const baseHeight = Math.min(dzi.tileSize, levelHeight - row * dzi.tileSize);
+        const expectedWidth = baseWidth
+          + (column > 0 ? dzi.overlap : 0)
+          + (column < columns - 1 ? dzi.overlap : 0);
+        const expectedHeight = baseHeight
+          + (row > 0 ? dzi.overlap : 0)
+          + (row < rows - 1 ? dzi.overlap : 0);
+
+        if (metadata.width !== expectedWidth || metadata.height !== expectedHeight) {
+          throw new Error(
+            `Falsche Größe für ${path.relative(root, path.join(levelDirectory, name))}: `
+            + `${metadata.width}x${metadata.height}, erwartet ${expectedWidth}x${expectedHeight}`
+          );
+        }
+        checkedTiles += 1;
+      }
+    }
+
+    if (actualNames.size > 0) {
+      throw new Error(
+        `Unerwartete Dateien in ${path.relative(root, levelDirectory)}: ${[...actualNames].join(", ")}`
+      );
+    }
+  }
+
+  return { levels: maxLevel + 1, checkedTiles };
+};
+
+const mapData = JSON.parse(await readFile(path.join(root, "data/maps.json"), "utf8"));
+if (mapData.schemaVersion !== 1 || !Array.isArray(mapData.maps) || mapData.maps.length < 2) {
+  throw new Error("data/maps.json hat ein ungültiges Schema.");
 }
-if (objectData.image?.width !== width || objectData.image?.height !== height) {
-  throw new Error("Die Bildgröße in data/objects.json stimmt nicht mit map.dzi überein.");
+
+const mapIds = new Set();
+const mapById = new Map();
+const mapStats = [];
+for (const map of mapData.maps) {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(map.id)) {
+    throw new Error(`Ungültige Karten-ID: ${map.id}`);
+  }
+  if (mapIds.has(map.id)) {
+    throw new Error(`Doppelte Karten-ID: ${map.id}`);
+  }
+  mapIds.add(map.id);
+  mapById.set(map.id, map);
+
+  if (!map.name || !isSafeRelativePath(map.tileSource) || path.extname(map.tileSource) !== ".dzi") {
+    throw new Error(`Unvollständige Kartendefinition: ${map.id}`);
+  }
+  if (!Number.isInteger(map.width) || map.width <= 0
+      || !Number.isInteger(map.height) || map.height <= 0) {
+    throw new Error(`Ungültige Bildgröße für Karte: ${map.id}`);
+  }
+  const view = map.defaultView;
+  if (!view || ![view.x, view.y, view.width, view.height].every(Number.isInteger)
+      || view.x < 0 || view.y < 0 || view.width <= 0 || view.height <= 0
+      || view.x + view.width > map.width || view.y + view.height > map.height) {
+    throw new Error(`Ungültige Standardansicht für Karte: ${map.id}`);
+  }
+
+  const dzi = await parseDzi(map.tileSource);
+  if (dzi.width !== map.width || dzi.height !== map.height) {
+    throw new Error(
+      `Die Bildgröße in data/maps.json stimmt für ${map.id} nicht mit ${map.tileSource} überein.`
+    );
+  }
+  if (dzi.tileSize <= 0 || dzi.overlap < 0) {
+    throw new Error(`Ungültige Kachelparameter in ${map.tileSource}`);
+  }
+  const pyramid = await validateTilePyramid(map, dzi);
+  mapStats.push({ map, ...pyramid });
+}
+
+for (const requiredMapId of ["object-map", "detail-map"]) {
+  if (!mapIds.has(requiredMapId)) {
+    throw new Error(`Benötigte Karten-ID fehlt: ${requiredMapId}`);
+  }
+}
+if (!mapIds.has(mapData.defaultMapId) || mapData.defaultMapId !== "object-map") {
+  throw new Error("object-map muss als gültige Standardkarte eingetragen sein.");
+}
+
+const objectData = JSON.parse(await readFile(path.join(root, "data/objects.json"), "utf8"));
+if (objectData.schemaVersion !== 2 || !Array.isArray(objectData.objects)) {
+  throw new Error("data/objects.json hat ein ungültiges Schema.");
 }
 
 const objectIds = new Set();
+const positionCounts = new Map([...mapIds].map((mapId) => [mapId, 0]));
 for (const object of objectData.objects) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(object.id)) {
     throw new Error(`Ungültige Objekt-ID: ${object.id}`);
@@ -84,69 +199,53 @@ for (const object of objectData.objects) {
   if (!object.name || !object.category || !validDepth) {
     throw new Error(`Unvollständiges Objekt: ${object.id}`);
   }
-  if (!Number.isInteger(object.x) || !Number.isInteger(object.y)
-      || object.x < 0 || object.x > width || object.y < 0 || object.y > height) {
-    throw new Error(`Objektkoordinaten außerhalb der Karte: ${object.id}`);
+  if (!object.positions || typeof object.positions !== "object" || Array.isArray(object.positions)) {
+    throw new Error(`positions muss ein Objekt sein: ${object.id}`);
   }
+  if ("x" in object || "y" in object) {
+    throw new Error(`Veraltete globale Koordinaten bei Objekt: ${object.id}`);
+  }
+  if (!object.positions["object-map"]) {
+    throw new Error(`Position auf der Objektkarte fehlt: ${object.id}`);
+  }
+
+  for (const [mapId, position] of Object.entries(object.positions)) {
+    const map = mapById.get(mapId);
+    if (!map) {
+      throw new Error(`Unbekannte Karten-ID bei Objekt ${object.id}: ${mapId}`);
+    }
+    if (!Number.isInteger(position?.x) || !Number.isInteger(position?.y)
+        || position.x < 0 || position.x >= map.width
+        || position.y < 0 || position.y >= map.height) {
+      throw new Error(`Objektkoordinaten außerhalb von ${mapId}: ${object.id}`);
+    }
+    positionCounts.set(mapId, positionCounts.get(mapId) + 1);
+  }
+
   if (!Array.isArray(object.photos)) {
     throw new Error(`photos muss ein Array sein: ${object.id}`);
   }
-
   for (const photo of object.photos) {
     if (!photo.src || !photo.alt) {
       throw new Error(`Foto ohne src oder alt bei Objekt: ${object.id}`);
     }
-    if (/^(?:https?:|\/)/.test(photo.src) || photo.src.includes("..")) {
+    if (!isSafeRelativePath(photo.src) || /^(?:https?:|\/)/.test(photo.src)) {
       throw new Error(`Foto muss einen sicheren relativen Pfad verwenden: ${photo.src}`);
     }
     await access(path.join(root, photo.src));
   }
 }
 
-for (let level = 0; level <= maxLevel; level += 1) {
-  const divisor = 2 ** (maxLevel - level);
-  const levelWidth = Math.ceil(width / divisor);
-  const levelHeight = Math.ceil(height / divisor);
-  const columns = Math.ceil(levelWidth / tileSize);
-  const rows = Math.ceil(levelHeight / tileSize);
-  const levelDirectory = path.join(root, "map_files", String(level));
-  const actualNames = new Set(await readdir(levelDirectory));
-
-  for (let column = 0; column < columns; column += 1) {
-    for (let row = 0; row < rows; row += 1) {
-      const name = `${column}_${row}.png`;
-      if (!actualNames.delete(name)) {
-        throw new Error(`Kachel fehlt: map_files/${level}/${name}`);
-      }
-
-      const metadata = await sharp(path.join(levelDirectory, name)).metadata();
-      const baseWidth = Math.min(tileSize, levelWidth - column * tileSize);
-      const baseHeight = Math.min(tileSize, levelHeight - row * tileSize);
-      const expectedWidth = baseWidth
-        + (column > 0 ? overlap : 0)
-        + (column < columns - 1 ? overlap : 0);
-      const expectedHeight = baseHeight
-        + (row > 0 ? overlap : 0)
-        + (row < rows - 1 ? overlap : 0);
-
-      if (metadata.width !== expectedWidth || metadata.height !== expectedHeight) {
-        throw new Error(
-          `Falsche Größe für ${level}/${name}: ${metadata.width}x${metadata.height}, `
-          + `erwartet ${expectedWidth}x${expectedHeight}`
-        );
-      }
-
-      checkedTiles += 1;
-    }
-  }
-
-  if (actualNames.size > 0) {
-    throw new Error(`Unerwartete Dateien in Zoomstufe ${level}: ${[...actualNames].join(", ")}`);
-  }
-}
+const mapSummary = mapStats
+  .map(({ map, levels, checkedTiles }) => (
+    `${map.name} ${map.width}x${map.height} Pixel, ${levels} Zoomstufen, ${checkedTiles} Kacheln`
+  ))
+  .join("; ");
+const positionSummary = [...positionCounts]
+  .map(([mapId, count]) => `${mapId}: ${count}`)
+  .join(", ");
 
 console.log(
-  `Projektprüfung erfolgreich: ${width}x${height} Pixel, `
-  + `${maxLevel + 1} Zoomstufen, ${checkedTiles} gültige Kacheln, `
-  + `${objectData.objects.length} interaktive Tauchziele.`
+  `Projektprüfung erfolgreich: ${mapSummary}; `
+  + `${objectData.objects.length} Tauchziele (${positionSummary}).`
 );

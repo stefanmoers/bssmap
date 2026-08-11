@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "defaultMapId": "object-map",
+  "maps": [
+    {
+      "id": "object-map",
+      "name": "Objektkarte",
+      "tileSource": "maps/object-map/map.dzi",
+      "width": 5750,
+      "height": 8117,
+      "defaultView": {
+        "x": 0,
+        "y": 0,
+        "width": 5750,
+        "height": 8117
+      }
+    },
+    {
+      "id": "detail-map",
+      "name": "Detailkarte",
+      "tileSource": "maps/detail-map/map.dzi",
+      "width": 7997,
+      "height": 11414,
+      "defaultView": {
+        "x": 0,
+        "y": 0,
+        "width": 7997,
+        "height": 11414
+      }
+    }
+  ]
+}

@@ -1,12 +1,29 @@
-# Tauchplatzkarte Blausteinsee - OpenSeadragon-Demo
+# Tauchplatzkarte Blausteinsee
 
-Dieses Repository enthält einen vollständig statischen Deep-Zoom-Viewer für die
-Tauchplatzkarte des Blausteinsees. Die Karte wird in kleinen Kacheln geladen und
-lässt sich dadurch auch auf Mobilgeräten flüssig zoomen und verschieben.
+Dieses Repository enthält einen vollständig statischen Deep-Zoom-Viewer für
+zwei interaktive Tauchplatzkarten des Blausteinsees. Große Karten werden als
+PNG-Kachelpyramiden geladen und bleiben dadurch auch auf Mobilgeräten flüssig
+zoombar.
+
+Verfügbar sind:
+
+- **Objektkarte** mit dem vollständigen bisherigen Objektbestand
+- **Detailkarte** mit Tiefenlinien, Leinenverläufen, Entfernungen und 62 sicher
+  lokalisierten Tauchzielen
+
+Der Umschalter lädt die jeweilige DZI-Quelle ohne vollständigen Seitenreload.
+Marker, Suche, Detailinformationen und Fotos werden automatisch auf die Ziele
+der aktiven Karte eingeschränkt.
 
 ## Lokal starten
 
-Im Projektverzeichnis unter Windows PowerShell:
+Die Seite muss über HTTP geöffnet werden. Unter macOS oder Linux:
+
+```bash
+python3 -m http.server 8080 --bind 0.0.0.0
+```
+
+Unter Windows PowerShell:
 
 ```powershell
 py -m http.server 8080 --bind 0.0.0.0
@@ -15,82 +32,88 @@ py -m http.server 8080 --bind 0.0.0.0
 Anschließend öffnen:
 
 ```text
-http://localhost:8080
+http://localhost:8080/
 ```
 
 Ein direkter Doppelklick auf `index.html` ist nicht zuverlässig, weil Browser
-das Nachladen lokaler Kacheln bei `file://` einschränken können.
+das Nachladen lokaler JSON-, DZI- und Kacheldateien bei `file://` einschränken
+können.
 
 ### Auf Handy oder Tablet testen
 
-PC und Mobilgerät müssen sich im selben WLAN befinden. Mit `ipconfig` die
-IPv4-Adresse des PCs ermitteln und auf dem Mobilgerät beispielsweise öffnen:
-
-```text
-http://192.168.178.35:8080
-```
-
-Falls Windows nachfragt, den Zugriff nur für private Netzwerke erlauben. Den
-Server anschließend mit `Strg+C` beenden.
-
-## Auf GitHub Pages veröffentlichen
-
-1. Ein neues GitHub-Repository anlegen.
-2. Den vollständigen Inhalt dieses Ordners in das Repository übernehmen.
-3. Committen und in den Branch `main` pushen.
-4. Auf GitHub `Settings` -> `Pages` öffnen.
-5. Unter `Build and deployment` die Quelle `Deploy from a branch` auswählen.
-6. Branch `main`, Ordner `/(root)` auswählen und speichern.
-
-Die Datei `.nojekyll` sorgt dafür, dass GitHub die statischen Viewer-Dateien
-unverändert veröffentlicht. Alle Pfade sind relativ und funktionieren daher
-auch unter einer Projektadresse wie:
-
-```text
-https://BENUTZERNAME.github.io/REPOSITORYNAME/
-```
+Computer und Mobilgerät müssen sich im selben privaten Netzwerk befinden. Die
+lokale IP-Adresse des Computers ermitteln und auf dem Mobilgerät beispielsweise
+`http://192.168.178.35:8080/` öffnen. Den Server anschließend mit `Strg+C`
+beenden.
 
 ## Bedienung
 
+- **Objektkarte / Detailkarte**: Kartenansicht umschalten
 - Ziehen: Kartenausschnitt verschieben
 - Mausrad oder Zwei-Finger-Geste: zoomen
 - Doppelklick oder Doppeltipp: hineinzoomen
 - `+` / `-`: Zoom ändern
-- `0`: gesamte Karte anzeigen
+- `0`: Standardansicht der aktiven Karte öffnen
 - `F`: Vollbildansicht umschalten
 - `◎`: Tauchziele öffnen und durchsuchen
 - gelbe Markierung: Informationen zum Tauchziel anzeigen
 
-Direkte Links zu einzelnen Objekten funktionieren über den Query-Parameter
-`object`, zum Beispiel:
+Der Kartenumschalter und die Marker sind mit Maus, Touch und Tastatur bedienbar.
+
+## Direkte Links
+
+Die Karten-ID wird mit `map`, das Tauchziel mit `object` angegeben:
 
 ```text
-https://BENUTZERNAME.github.io/REPOSITORYNAME/?object=segelboot
+?map=object-map
+?map=detail-map
+?map=object-map&object=segelboot
+?map=detail-map&object=segelboot
 ```
 
-## Interaktive Tauchziele pflegen
-
-Die Tauchziele stehen getrennt von der Karte in `data/objects.json`. Koordinaten
-beziehen sich auf das 5.750 x 8.117 Pixel große Kartenbild. Änderungen an der
-JSON-Datei benötigen keine Neuerzeugung der Kartenkacheln.
-
-Wenn die Karte für ein Ziel keine Tiefe nennt, wird `depthMeters` auf `null`
-gesetzt. Die Detailansicht zeigt dann „nicht angegeben“, ohne eine Tiefe zu
-erraten.
-
-Zum Erfassen einer neuen Position die Karte lokal mit `?edit=1` öffnen:
+Bestehende Links ohne `map` bleiben gültig und öffnen die Objektkarte:
 
 ```text
-http://localhost:8080/?edit=1
+?object=segelboot
 ```
 
-Nach einem Klick auf die Karte erzeugt der Bearbeitungsmodus einen JSON-Eintrag,
-der nach `data/objects.json` kopiert werden kann.
+Unbekannte Karten-IDs fallen auf die Objektkarte zurück. Fehlt einem Objekt die
+Position auf der gewählten Karte, wird es dort weder in der Liste noch als
+Marker angeboten.
 
-### Fotos zu einem Tauchziel ergänzen
+## Karten- und Objektdaten pflegen
 
-Fotos werden unter `images/objects/<objekt-id>/` abgelegt und beim Objekt als
-optionale Liste eingetragen:
+`data/maps.json` beschreibt Karten-ID, sichtbaren Namen, DZI-Quelle,
+Bildabmessungen und Standardansicht. Objektmetadaten bleiben einmalig in
+`data/objects.json`; nur die Koordinaten werden pro Karte gespeichert:
+
+```json
+{
+  "id": "segelboot",
+  "name": "Segelboot",
+  "positions": {
+    "object-map": { "x": 2800, "y": 5450 },
+    "detail-map": { "x": 3846, "y": 7690 }
+  }
+}
+```
+
+Fehlt eine Karten-ID unter `positions`, ist das Objekt auf dieser Karte nicht
+sichtbar. Koordinaten sind ganzzahlige Bildpixel und keine GPS-Koordinaten.
+
+Zum Erfassen einer Position die gewünschte Karte im Bearbeitungsmodus öffnen:
+
+```text
+http://localhost:8080/?map=detail-map&edit=1
+```
+
+Nach einem Klick auf die tatsächliche Objektposition erzeugt der Editor einen
+JSON-Eintrag mit der aktiven Karten-ID.
+
+### Fotos ergänzen
+
+Fotos liegen unter `images/objects/<objekt-id>/` und werden als optionale Liste
+am kanonischen Objekt eingetragen:
 
 ```json
 "photos": [
@@ -102,57 +125,75 @@ optionale Liste eingetragen:
 ]
 ```
 
-Mehrere Bilder werden als Galerie dargestellt und lassen sich vergrößern. Eine
-ausführlichere Anleitung steht in `images/objects/README.md`.
+Weitere Hinweise stehen in `images/objects/README.md`.
 
-## Karte später aus dem Originalmaterial neu erzeugen
+## Kacheln reproduzierbar erzeugen
 
-Für die endgültige Fassung sollte aus der originalen Inkscape-Datei ein etwa
-5.750 x 8.100 Pixel großes PNG exportiert werden. Die Kacheln können danach mit
-dem enthaltenen Build-Skript neu erzeugt werden.
+Voraussetzung ist Node.js 20 oder neuer. Abhängigkeiten installieren:
 
-Voraussetzung: Node.js 20 oder neuer.
-
-```powershell
+```bash
 npm install
-npm run generate-tiles -- --input C:\Pfad\zur\karte.png
 ```
 
-Der Befehl ersetzt `map.dzi` und den Ordner `map_files`. Verwendet werden
-verlustfreie PNG-Kacheln mit 512 x 512 Pixeln. Anschließend die Änderung lokal
-prüfen und gemeinsam mit den erzeugten Kacheln committen.
+Die Detailkarte basiert auf
+`2026-08-11b_Blausteinsee-sz.ohne-Details.erweitert.pdf`. Die einzige relevante
+PDF-Seite wurde verlustfrei mit 400 dpi als PNG mit `7997 × 11414` Pixeln
+gerastert. Ein reproduzierbarer Ablauf ist:
 
-Falls OpenSeadragon später aktualisiert wird:
+```bash
+mkdir -p tmp/pdfs
+pdfinfo 2026-08-11b_Blausteinsee-sz.ohne-Details.erweitert.pdf
+pdftoppm -f 1 -l 1 -singlefile -r 400 -png \
+  2026-08-11b_Blausteinsee-sz.ohne-Details.erweitert.pdf \
+  tmp/pdfs/detail-map-400
+npm run generate-tiles -- \
+  --input tmp/pdfs/detail-map-400.png \
+  --output maps/detail-map/map
+```
 
-```powershell
+Das temporäre PNG wird nicht committed. Das Skript ersetzt dagegen bewusst die
+angegebene `.dzi`-Datei und den zugehörigen `_files`-Ordner. Die Objektkarte
+wurde unverändert nach `maps/object-map/` verschoben und nicht neu erzeugt.
+
+OpenSeadragon wird lokal ausgeliefert und kontrolliert aktualisiert mit:
+
+```bash
 npm install
 npm run copy-vendor
 ```
 
-Die vollständige Kachelpyramide lässt sich anschließend prüfen mit:
+## Prüfung
 
-```powershell
+```bash
 npm test
+git diff --check
 ```
+
+Der Validator prüft beide Kartendefinitionen, DZI-Abmessungen, vollständige
+Kachelpyramiden, kartenspezifische Objektpositionen, eindeutige IDs und alle
+Fotoreferenzen.
 
 ## Projektstruktur
 
 ```text
-index.html                 Viewer-Seite
-styles.css                 Responsive Darstellung
-viewer.js                  OpenSeadragon-Konfiguration
-data/objects.json          Tauchziele, Koordinaten und Fotoreferenzen
-images/objects/            Objektfotos und Fotoanleitung
-map.dzi                    Beschreibung der Kachelpyramide
-map_files/                 Kartenkacheln je Zoomstufe
-vendor/openseadragon/      Lokale OpenSeadragon-Laufzeit
-scripts/                   Skripte zur Neuerzeugung
+index.html                         Viewer-Seite und Kartenumschalter
+styles.css                        Responsive Oberfläche und Marker
+viewer.js                         OpenSeadragon- und Mehrkartenlogik
+data/maps.json                    Kartendefinitionen
+data/objects.json                 Objekte und kartenspezifische Positionen
+maps/object-map/map.dzi           DZI der Objektkarte
+maps/object-map/map_files/        Kacheln der Objektkarte
+maps/detail-map/map.dzi           DZI der Detailkarte
+maps/detail-map/map_files/        Kacheln der Detailkarte
+images/objects/                   Unterwasserfotos
+vendor/openseadragon/             Lokale OpenSeadragon-Laufzeit
+scripts/                          Kachelerzeugung und Projektvalidator
 ```
 
-## Hinweise
+## GitHub Pages und Rechte
 
-- Die Karte und ihre Inhalte bleiben Eigentum der jeweiligen Urheber.
-- Vor einer öffentlichen Veröffentlichung sollten Freigabe und Bildrechte
-  geklärt werden.
-- OpenSeadragon wird unter der BSD-3-Clause-Lizenz bereitgestellt; der
-  zugehörige Lizenztext liegt im Vendor-Verzeichnis.
+Alle Ressourcen verwenden relative Pfade und funktionieren unter einer
+GitHub-Pages-Projektadresse. Die Karten, Symbole, Texte und Fotos bleiben
+Eigentum ihrer jeweiligen Urheber; vor einer öffentlichen Veröffentlichung
+sind Freigaben und Bildrechte zu prüfen. OpenSeadragon wird unter der
+BSD-3-Clause-Lizenz ausgeliefert.

@@ -26,51 +26,40 @@ Die wichtigsten Nutzerfunktionen sind:
 - Tauchziele durchsuchen und nach Name sortiert auflisten
 - Detailansicht mit Name, Tiefe, Kategorie und Beschreibung öffnen
 - optionale Unterwasserfotos als Galerie und vergrößert anzeigen
-- direkte Links zu Tauchzielen über `?object=<id>` verwenden
-- Objektkoordinaten lokal über `?edit=1` erfassen
+- zwischen Objektkarte und Detailkarte ohne Seitenreload umschalten
+- direkte Links über `?map=<id>&object=<id>` verwenden
+- kartenspezifische Objektkoordinaten lokal über `?edit=1` erfassen
 - Vollbild- und Navigatoransicht nutzen
 
 ## Aktueller Stand
 
-Zum Zeitpunkt der Erstellung dieser Datei ist eine Karte umgesetzt:
+Zum Zeitpunkt der Aktualisierung sind zwei Karten umgesetzt:
 
-- Deep-Zoom-Quelle: `map.dzi` und `map_files/`
-- Kartenbild: 5.750 x 8.117 Pixel
+- **Objektkarte**: `maps/object-map/map.dzi`, 5.750 x 8.117 Pixel,
+  67 kartenspezifische Positionen
+- **Detailkarte**: `maps/detail-map/map.dzi`, 7.997 x 11.414 Pixel,
+  62 visuell kontrollierte kartenspezifische Positionen
 - Kachelformat: PNG
 - Kachelgröße: 512 x 512 Pixel
 - Überlappung: 1 Pixel
 - OpenSeadragon: 6.1.0, lokal unter `vendor/openseadragon/`
+- Kartendaten: `data/maps.json`
 - Objektdaten: `data/objects.json`
-- aktuell 67 interaktive Tauchziele
+- insgesamt 67 kanonische Tauchziele
 - Fotos sind unter anderem für Fahrrad, M&M und Segelboot hinterlegt
 
 Verlasse dich bei automatisch prüfbaren Zahlen nicht ausschließlich auf diesen
 Text. `npm test` und die tatsächlich vorhandenen Daten sind die maßgebliche
 Quelle.
 
-## Geplante Erweiterung: zwei Kartenansichten
+## Zwei Kartenansichten
 
-Diese Erweiterung ist beabsichtigt, aber noch nicht umgesetzt. Behandle sie
-nicht als bestehenden Funktionsumfang.
+Die beiden Karten werden über einen responsiven Umschalter ohne Seitenreload
+geöffnet. Marker, Suche, Detailinformationen und Fotos funktionieren auf beiden
+Karten. Objektliste und Marker enthalten nur Ziele, die eine Position für die
+aktive Karte besitzen.
 
-Zukünftig sollen zwei Karten über einen gut bedienbaren Umschalter verfügbar
-sein:
-
-1. **Objektkarte**: die bisherige Karte mit dem großen Seeausschnitt und allen
-   vorhandenen Tauchzielen. Als neues Ausgangsmaterial liegt eine ungefähr
-   10 MB große SVG-Datei vor.
-2. **Detailkarte**: eine neuere Karte im A3-Querformat mit Tiefenlinien,
-   Leinenverläufen, Entfernungen und zusätzlichen Orientierungspunkten. Das
-   Ausgangsmaterial ist die PDF-Datei
-   `2026-07-26a_Blausteinsee-sz.ohne-Details.pdf`.
-
-Beide Ansichten sollen Deep-Zoom-Kacheln verwenden und interaktiv bleiben.
-Marker, Suche, Detailinformationen und Fotos sollen auf beiden Karten
-funktionieren. Die Detailkarte zeigt nur einen Teil des Sees; Tauchziele
-außerhalb ihres Kartenausschnitts dürfen dort nicht als Marker oder als
-erreichbare Listeneinträge erscheinen.
-
-Für die Umsetzung wird folgende Struktur bevorzugt:
+Die implementierte Struktur lautet:
 
 ```text
 maps/
@@ -85,9 +74,9 @@ data/
   objects.json
 ```
 
-`data/maps.json` soll Karten-ID, Bezeichnung, Tile-Source und Bildabmessungen
-beschreiben. Objektinformationen bleiben kanonisch in `data/objects.json`;
-Koordinaten werden pro Karte gespeichert, zum Beispiel:
+`data/maps.json` beschreibt Karten-ID, Bezeichnung, Tile-Source,
+Bildabmessungen und Standardansicht. Objektinformationen bleiben kanonisch in
+`data/objects.json`; Koordinaten werden pro Karte gespeichert, zum Beispiel:
 
 ```json
 {
@@ -95,13 +84,10 @@ Koordinaten werden pro Karte gespeichert, zum Beispiel:
   "name": "Segelboot",
   "positions": {
     "object-map": { "x": 2800, "y": 5450 },
-    "detail-map": { "x": 2160, "y": 1420 }
+    "detail-map": { "x": 3846, "y": 7690 }
   }
 }
 ```
-
-Die Beispielkoordinaten der Detailkarte sind nur ein Schema-Beispiel und keine
-vermessene Position. Übernimm sie nicht ungeprüft.
 
 Fehlt eine Position für eine Karte, gilt das Objekt dort als nicht sichtbar.
 Dupliziere Name, Tiefe, Beschreibung und Fotos nicht für jede Karte.
@@ -109,8 +95,8 @@ Dupliziere Name, Tiefe, Beschreibung und Fotos nicht für jede Karte.
 Beim Umschalten der Karten soll nach Möglichkeit:
 
 - das ausgewählte Objekt auf der Zielkarte erneut fokussiert werden,
-- andernfalls ein entsprechender geografischer Ausschnitt erhalten bleiben,
-- andernfalls die Zielkarte in ihrer Gesamtansicht geöffnet werden,
+- andernfalls eine verständliche Statusmeldung erscheinen und die Zielkarte in
+  ihrer Standardansicht geöffnet werden,
 - die Karten-ID zusätzlich über `?map=<id>` verlinkbar sein,
 - ein Objektlink sowohl `map` als auch `object` enthalten können.
 
@@ -119,16 +105,23 @@ verwende keine ungeprüfte einfache Skalierung der Koordinaten. Ermittle
 Positionen anhand gemeinsamer Referenzpunkte und kontrolliere jeden Marker
 visuell.
 
+Die Detailkarte basiert auf
+`2026-08-11b_Blausteinsee-sz.ohne-Details.erweitert.pdf`. Die einzige Seite
+wurde bei 400 dpi verlustfrei zu 7.997 x 11.414 Pixeln gerastert. Das temporäre
+PNG gehört nicht ins Repository.
+
 ## Technische Architektur
 
 Das Projekt verwendet bewusst wenige Bausteine:
 
 - `index.html`: semantische Struktur und Bedienelemente
 - `styles.css`: responsive Gestaltung, Marker und Dialoge
-- `viewer.js`: OpenSeadragon, Zustandsverwaltung und UI-Verhalten
+- `viewer.js`: OpenSeadragon, Mehrkarten-Zustand, History und UI-Verhalten
+- `data/maps.json`: Kartendefinitionen und Standardansichten
 - `data/objects.json`: Objektmetadaten, Koordinaten und Fotoreferenzen
 - `images/objects/`: Unterwasserfotos
-- `map.dzi` und `map_files/`: generierte Deep-Zoom-Karte
+- `maps/object-map/`: DZI und Kacheln der Objektkarte
+- `maps/detail-map/`: DZI und Kacheln der Detailkarte
 - `vendor/openseadragon/`: lokal ausgelieferte Bibliothek und Bedienelemente
 - `scripts/generate-tiles.mjs`: reproduzierbare Kachelerzeugung
 - `scripts/validate-project.mjs`: strukturelle Projektprüfung
@@ -163,13 +156,12 @@ Kacheln werden mit Node.js 20 oder neuer erzeugt:
 
 ```bash
 npm install
-npm run generate-tiles -- --input /pfad/zur/karte.png --output map
+npm run generate-tiles -- --input /pfad/zur/karte.png --output maps/detail-map/map
 ```
 
 Das Skript löscht und ersetzt die zum angegebenen Output gehörende `.dzi`-Datei
-und den zugehörigen `_files`-Ordner. Wähle den Output daher bewusst. Bei zwei
-Karten sollen getrennte Ziele wie `maps/object-map/map` und
-`maps/detail-map/map` verwendet werden.
+und den zugehörigen `_files`-Ordner. Wähle den Output daher bewusst und verwende
+getrennte Ziele wie `maps/object-map/map` und `maps/detail-map/map`.
 
 SVG-Ausgangsmaterial kann in einer kontrollierten Pixelgröße direkt oder über
 einen verlustfreien PNG-Zwischenschritt gerastert werden. PDFs werden vor der
@@ -178,8 +170,9 @@ explizit gewählten Auflösung gerastert. Dokumentiere die gewählte Zielgröße
 
 ### Objektkoordinaten
 
-Im aktuellen Schema beziehen sich `x` und `y` direkt auf das 5.750 x 8.117
-Pixel große Kartenbild. Sie sind keine GPS-Koordinaten.
+Koordinaten stehen unter `positions.<karten-id>` und beziehen sich direkt auf
+das jeweilige Kartenbild. Sie sind keine GPS-Koordinaten. Die Objektkarte ist
+5.750 x 8.117 Pixel, die Detailkarte 7.997 x 11.414 Pixel groß.
 
 - Setze Marker auf die Illustration beziehungsweise die tatsächliche
   Objektposition, nicht auf Beschriftung, Tiefenangabe oder einen benachbarten
@@ -187,7 +180,8 @@ Pixel große Kartenbild. Sie sind keine GPS-Koordinaten.
 - Bei Linienobjekten verwende den tatsächlichen Knoten oder Kreuzungspunkt.
 - Rate keine Koordinaten. Nutze den Bearbeitungsmodus oder einen visuell
   kontrollierten Koordinatenabgleich.
-- Öffne zur Positionserfassung lokal `http://localhost:8080/?edit=1`.
+- Öffne zur Positionserfassung beispielsweise
+  `http://localhost:8080/?map=detail-map&edit=1`.
 - Kontrolliere nach größeren Koordinatenänderungen alle betroffenen Sektoren
   als Overlay auf dem Originalbild.
 - Halte Koordinaten ganzzahlig und innerhalb der jeweiligen Bildabmessungen.
@@ -209,16 +203,17 @@ Das aktuelle Schema sieht vereinfacht so aus:
 
 ```json
 {
-  "schemaVersion": 1,
-  "image": { "width": 5750, "height": 8117 },
+  "schemaVersion": 2,
   "objects": [
     {
       "id": "segelboot",
       "name": "Segelboot",
       "depthMeters": 26.5,
       "category": "Boot",
-      "x": 2800,
-      "y": 5450,
+      "positions": {
+        "object-map": { "x": 2800, "y": 5450 },
+        "detail-map": { "x": 3846, "y": 7690 }
+      },
       "description": "...",
       "photos": []
     }
@@ -272,7 +267,7 @@ JSON-, DZI- und Kacheldateien nicht zuverlässig.
 Beispiel:
 
 ```bash
-python -m http.server 8080 --bind 0.0.0.0
+python3 -m http.server 8080 --bind 0.0.0.0
 ```
 
 Danach:
@@ -294,14 +289,12 @@ git diff --check
 
 - JavaScript-Syntax von `viewer.js`
 - erforderliche Dateien und HTML-IDs
+- Schema, eindeutige IDs und Standardansichten in `data/maps.json`
 - Schema und Werte in `data/objects.json`
+- kartenspezifische Positionen innerhalb der jeweiligen Bildabmessungen
 - referenzierte Fotodateien
-- DZI-Abmessungen
-- Vollständigkeit und Pixelabmessungen aller Kartenkacheln
-
-Erweitere `scripts/validate-project.mjs`, sobald mehrere Karten oder ein neues
-Datenschema eingeführt werden. Beide DZI-Pyramiden und alle kartenspezifischen
-Positionen müssen dann validiert werden.
+- DZI-Abmessungen beider Karten
+- Vollständigkeit und Pixelabmessungen beider Kachelpyramiden
 
 Führe zusätzlich einen Browser-Smoke-Test über einen lokalen HTTP-Server durch:
 
@@ -310,10 +303,11 @@ Führe zusätzlich einen Browser-Smoke-Test über einen lokalen HTTP-Server durc
 3. Objektpanel öffnen, suchen und ein Objekt auswählen.
 4. Marker mit Maus und Touch beziehungsweise emuliertem Touch öffnen.
 5. Fotos öffnen und schließen.
-6. Direkten Link mit `?object=segelboot` testen.
-7. Bearbeitungsmodus `?edit=1` testen, wenn Koordinatenlogik geändert wurde.
-8. Nach Umsetzung der zweiten Karte den Umschalter, die gefilterte Objektliste,
-   `?map=<id>` und den Wechsel eines ausgewählten Objekts testen.
+6. Direkte Links mit `?object=segelboot` sowie `?map=<id>&object=<id>` testen.
+7. Bearbeitungsmodus `?map=<id>&edit=1` testen, wenn Koordinatenlogik geändert
+   wurde.
+8. Umschalter, gefilterte Objektliste, unbekannte Karten-IDs, Objektübernahme
+   sowie Browser-Zurück und Browser-Vorwärts testen.
 
 Prüfe mindestens eine typische Desktopgröße und eine schmale Mobilansicht.
 

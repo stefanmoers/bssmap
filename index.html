@@ -17,6 +17,11 @@
       <h1>Tauchplatzkarte Blausteinsee</h1>
     </header>
 
+    <div id="map-switcher" class="map-switcher" role="group" aria-label="Kartenansicht wählen">
+      <button type="button" data-map-id="object-map" aria-pressed="true">Objektkarte</button>
+      <button type="button" data-map-id="detail-map" aria-pressed="false">Detailkarte</button>
+    </div>
+
     <nav class="toolbar" aria-label="Kartensteuerung">
       <button id="zoom-in" type="button" title="Hineinzoomen" aria-label="Hineinzoomen">+</button>
       <button id="zoom-out" type="button" title="Herauszoomen" aria-label="Herauszoomen">−</button>
@@ -81,7 +86,7 @@
           <span class="eyebrow">Bearbeitungsmodus</span>
           <h2>Objekt erfassen</h2>
         </div>
-        <a href="./" aria-label="Bearbeitungsmodus schließen">×</a>
+        <a id="editor-close" href="./" aria-label="Bearbeitungsmodus schließen">×</a>
       </header>
       <p>Klicke auf die Position des Objekts in der Karte.</p>
       <div class="editor-fields">
@@ -93,7 +98,7 @@
       <button id="coordinate-copy" class="secondary-button" type="button" disabled>JSON-Eintrag kopieren</button>
     </section>
 
-    <p id="status" class="status" role="status" aria-live="polite">Karte wird geladen …</p>
+    <p id="status" class="status" role="status" aria-live="polite">Karten werden geladen …</p>
 
     <aside class="usage-hint" aria-label="Bedienhinweis">
       <span class="desktop-hint">Ziehen zum Verschieben · Mausrad zum Zoomen</span>
