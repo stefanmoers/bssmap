@@ -450,37 +450,62 @@ h1 {
 }
 
 .map-marker {
-  display: grid;
-  width: 28px;
-  height: 28px;
+  /* OpenSeadragon setzt display:block als Inline-Stil am Overlay. */
+  display: grid !important;
+  width: 36px;
+  height: 36px;
   padding: 0;
   place-items: center;
-  border: 2px solid rgba(255, 255, 255, 0.94);
+  border: 0;
   border-radius: 50%;
-  background: #f3b61f;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.52);
+  appearance: none;
+  background: transparent;
   cursor: pointer;
-  transition: transform 130ms ease, background-color 130ms ease;
+}
+
+.map-marker::before,
+.map-marker::after {
+  grid-area: 1 / 1;
+  border-radius: 50%;
+  content: "";
+}
+
+.map-marker::before {
+  box-sizing: border-box;
+  width: var(--marker-visual-size, 15px);
+  height: var(--marker-visual-size, 15px);
+  border: 2px solid rgba(255, 255, 255, 0.94);
+  background: #f3b61f;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  transition: width 100ms linear, height 100ms linear, transform 130ms ease, background-color 130ms ease;
 }
 
 .map-marker::after {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: clamp(3px, calc(var(--marker-visual-size, 15px) * 0.21), 6px);
+  height: clamp(3px, calc(var(--marker-visual-size, 15px) * 0.21), 6px);
   background: #102338;
-  content: "";
 }
 
 .map-marker:hover,
 .map-marker:focus-visible,
 .map-marker.is-selected {
   z-index: 2;
-  background: #8ed9ff;
-  transform: scale(1.25);
 }
 
-.map-marker.is-selected {
+.map-marker:hover::before,
+.map-marker:focus-visible::before,
+.map-marker.is-selected::before {
+  background: #8ed9ff;
+  transform: scale(1.2);
+}
+
+.map-marker.is-selected::before {
   box-shadow: 0 0 0 6px rgba(142, 217, 255, 0.24), 0 3px 12px rgba(0, 0, 0, 0.52);
+}
+
+.map-marker:focus-visible {
+  outline: 2px solid #8ed9ff;
+  outline-offset: 0;
 }
 
 .map-shell.panel-open .navigator {
@@ -729,8 +754,8 @@ h1 {
   }
 
   .map-marker {
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
   }
 
   .coordinate-editor {

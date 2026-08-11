@@ -23,6 +23,7 @@
   let objects = [];
   let objectById = new Map();
   const markers = new Map();
+  const markerTrackers = [];
   let selectedObject = null;
   let selectedPhoto = null;
   let editorPoint = null;
@@ -147,6 +148,17 @@
     markers.forEach((marker) => {
       marker.hidden = !markerVisibility.checked;
     });
+  };
+
+  const updateMarkerScale = (zoom = viewer.viewport.getZoom(true)) => {
+    const homeZoom = viewer.viewport.getHomeZoom();
+    if (!Number.isFinite(zoom) || !Number.isFinite(homeZoom) || homeZoom <= 0) {
+      return;
+    }
+
+    const zoomRatio = Math.max(1, zoom / homeZoom);
+    const markerSize = Math.min(28, 15 + Math.log2(zoomRatio) * 8);
+    viewerElement.style.setProperty("--marker-visual-size", `${markerSize.toFixed(1)}px`);
   };
 
   const focusObjectOnMap = (object) => {
@@ -278,10 +290,34 @@
       marker.className = "map-marker";
       marker.setAttribute("aria-label", `${object.name}, ${formatDepth(object.depthMeters)}`);
       marker.title = `${object.name} · ${formatDepth(object.depthMeters)}`;
+
+      // Die native Klickbehandlung bleibt für Tastaturbedienung erhalten.
+      // Zeiger- und Touch-Ereignisse innerhalb des Viewers übernimmt dagegen
+      // ein eigener OpenSeadragon-Tracker, damit der Karten-Tracker den Klick
+      // nicht als Beginn einer Verschiebegeste abfängt.
       marker.addEventListener("click", (event) => {
+        if (event.detail !== 0) {
+          return;
+        }
         event.stopPropagation();
         selectObject(object.id);
       });
+
+      const markerTracker = new OpenSeadragon.MouseTracker({
+        element: marker,
+        preProcessEventHandler: (event) => {
+          if (["pointerdown", "pointerup", "click"].includes(event.eventType)) {
+            event.stopPropagation = true;
+          }
+        },
+        clickHandler: (event) => {
+          if (event.quick) {
+            selectObject(object.id);
+          }
+        }
+      });
+      markerTracker.setTracking(true);
+      markerTrackers.push(markerTracker);
 
       viewer.addOverlay({
         element: marker,
@@ -457,6 +493,7 @@
       objectById = new Map(objects.map((object) => [object.id, object]));
       renderObjectList();
       addObjectMarkers();
+      updateMarkerScale();
 
       const params = new URLSearchParams(window.location.search);
       const requestedObject = params.get("object");
@@ -477,6 +514,8 @@
     showStatus("Die Kartenkacheln konnten nicht geladen werden.");
     console.error("OpenSeadragon open-failed", event);
   });
+
+  viewer.addHandler("zoom", (event) => updateMarkerScale(event.zoom));
 
   document.addEventListener("keydown", (event) => {
     const target = event.target;
