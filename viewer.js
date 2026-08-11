@@ -163,7 +163,7 @@
     // Schaltfläche in CSS erhält trotzdem eine zuverlässige Touch-Klickfläche.
     const zoomSteps = Math.log2(zoomRatio);
     const markerSize = Math.min(20, 7 + zoomSteps * 6);
-    const markerOpacity = Math.min(1, 0.4 + zoomSteps * 0.15);
+    const markerOpacity = Math.min(1, 0.2 + zoomSteps * 0.2);
     viewerElement.style.setProperty("--marker-visual-size", `${markerSize.toFixed(1)}px`);
     viewerElement.style.setProperty("--marker-fill-opacity", markerOpacity.toFixed(2));
   };
