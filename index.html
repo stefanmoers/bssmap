@@ -21,8 +21,77 @@
       <button id="zoom-in" type="button" title="Hineinzoomen" aria-label="Hineinzoomen">+</button>
       <button id="zoom-out" type="button" title="Herauszoomen" aria-label="Herauszoomen">−</button>
       <button id="home" type="button" title="Gesamte Karte anzeigen" aria-label="Gesamte Karte anzeigen">⌂</button>
+      <button id="objects-open" type="button" title="Tauchziele öffnen" aria-label="Tauchziele öffnen" aria-expanded="false">◎</button>
       <button id="full-page" type="button" title="Vollbild umschalten" aria-label="Vollbild umschalten" aria-pressed="false">⛶</button>
     </nav>
+
+    <aside id="object-panel" class="object-panel" aria-hidden="true" aria-label="Tauchziele">
+      <header class="panel-header">
+        <div>
+          <span class="eyebrow">Tauchplatzkarte</span>
+          <h2>Tauchziele</h2>
+        </div>
+        <button id="objects-close" class="icon-button" type="button" aria-label="Tauchziele schließen">×</button>
+      </header>
+
+      <section id="object-browser" class="object-browser">
+        <label class="search-field" for="object-search">
+          <span>Objekt suchen</span>
+          <input id="object-search" type="search" placeholder="z. B. Segelboot" autocomplete="off">
+        </label>
+
+        <label class="marker-toggle">
+          <input id="marker-visibility" type="checkbox" checked>
+          <span>Markierungen auf der Karte anzeigen</span>
+        </label>
+
+        <p id="object-count" class="object-count"></p>
+        <div id="object-list" class="object-list"></div>
+      </section>
+
+      <article id="object-detail" class="object-detail" hidden>
+        <button id="object-back" class="back-button" type="button">← Alle Tauchziele</button>
+
+        <div id="photo-stage" class="photo-stage" hidden>
+          <button id="photo-open" type="button" aria-label="Foto vergrößern">
+            <img id="object-photo" alt="">
+          </button>
+          <p id="photo-caption" class="photo-caption"></p>
+          <div id="photo-thumbnails" class="photo-thumbnails" aria-label="Weitere Fotos"></div>
+        </div>
+
+        <div id="photo-placeholder" class="photo-placeholder">
+          <span aria-hidden="true">▧</span>
+          <p>Noch kein Foto hinterlegt</p>
+        </div>
+
+        <div class="detail-heading">
+          <span id="object-category" class="category-badge"></span>
+          <h2 id="object-name"></h2>
+          <p id="object-depth" class="object-depth"></p>
+        </div>
+        <p id="object-description" class="object-description"></p>
+        <button id="object-link-copy" class="secondary-button" type="button">Link zu diesem Objekt kopieren</button>
+      </article>
+    </aside>
+
+    <section id="coordinate-editor" class="coordinate-editor" hidden aria-label="Objektkoordinaten erfassen">
+      <header>
+        <div>
+          <span class="eyebrow">Bearbeitungsmodus</span>
+          <h2>Objekt erfassen</h2>
+        </div>
+        <a href="./" aria-label="Bearbeitungsmodus schließen">×</a>
+      </header>
+      <p>Klicke auf die Position des Objekts in der Karte.</p>
+      <div class="editor-fields">
+        <label>Name <input id="editor-name" type="text" placeholder="Segelboot"></label>
+        <label>Tiefe in m <input id="editor-depth" type="number" min="0" max="100" step="0.1"></label>
+        <label>Kategorie <input id="editor-category" type="text" placeholder="Boot"></label>
+      </div>
+      <output id="coordinate-output">Noch keine Position gewählt.</output>
+      <button id="coordinate-copy" class="secondary-button" type="button" disabled>JSON-Eintrag kopieren</button>
+    </section>
 
     <p id="status" class="status" role="status" aria-live="polite">Karte wird geladen …</p>
 
@@ -35,6 +104,12 @@
       <p class="error-card">Für die interaktive Karte muss JavaScript aktiviert sein.</p>
     </noscript>
   </main>
+
+  <dialog id="photo-dialog" class="photo-dialog">
+    <button id="photo-dialog-close" class="icon-button" type="button" aria-label="Foto schließen">×</button>
+    <img id="photo-dialog-image" alt="">
+    <p id="photo-dialog-caption"></p>
+  </dialog>
 
   <script src="vendor/openseadragon/openseadragon.min.js"></script>
   <script src="viewer.js"></script>

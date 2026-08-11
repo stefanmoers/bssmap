@@ -1,0 +1,1422 @@
+diff --git a/README.md b/README.md
+index 0c82f6f..f3553f0 100644
+--- a/README.md
++++ b/README.md
+@@ -58,6 +58,48 @@ https://BENUTZERNAME.github.io/REPOSITORYNAME/
+ - `+` / `-`: Zoom ändern
+ - `0`: gesamte Karte anzeigen
+ - `F`: Vollbildansicht umschalten
++- `◎`: Tauchziele öffnen und durchsuchen
++- gelbe Markierung: Informationen zum Tauchziel anzeigen
++
++Direkte Links zu einzelnen Objekten funktionieren über den Query-Parameter
++`object`, zum Beispiel:
++
++```text
++https://BENUTZERNAME.github.io/REPOSITORYNAME/?object=segelboot
++```
++
++## Interaktive Tauchziele pflegen
++
++Die Tauchziele stehen getrennt von der Karte in `data/objects.json`. Koordinaten
++beziehen sich auf das 5.750 x 8.117 Pixel große Kartenbild. Änderungen an der
++JSON-Datei benötigen keine Neuerzeugung der Kartenkacheln.
++
++Zum Erfassen einer neuen Position die Karte lokal mit `?edit=1` öffnen:
++
++```text
++http://localhost:8080/?edit=1
++```
++
++Nach einem Klick auf die Karte erzeugt der Bearbeitungsmodus einen JSON-Eintrag,
++der nach `data/objects.json` kopiert werden kann.
++
++### Fotos zu einem Tauchziel ergänzen
++
++Fotos werden unter `images/objects/<objekt-id>/` abgelegt und beim Objekt als
++optionale Liste eingetragen:
++
++```json
++"photos": [
++  {
++    "src": "images/objects/segelboot/segelboot-01.jpg",
++    "alt": "Segelboot auf dem Grund des Blausteinsees",
++    "caption": "Aufnahme von der Steuerbordseite"
++  }
++]
++```
++
++Mehrere Bilder werden als Galerie dargestellt und lassen sich vergrößern. Eine
++ausführlichere Anleitung steht in `images/objects/README.md`.
+ 
+ ## Karte später aus dem Originalmaterial neu erzeugen
+ 
+@@ -95,6 +137,8 @@ npm test
+ index.html                 Viewer-Seite
+ styles.css                 Responsive Darstellung
+ viewer.js                  OpenSeadragon-Konfiguration
++data/objects.json          Tauchziele, Koordinaten und Fotoreferenzen
++images/objects/            Objektfotos und Fotoanleitung
+ map.dzi                    Beschreibung der Kachelpyramide
+ map_files/                 Kartenkacheln je Zoomstufe
+ vendor/openseadragon/      Lokale OpenSeadragon-Laufzeit
+diff --git a/data/objects.json b/data/objects.json
+new file mode 100644
+index 0000000..461c2db
+--- /dev/null
++++ b/data/objects.json
+@@ -0,0 +1,109 @@
++{
++  "schemaVersion": 1,
++  "image": {
++    "width": 5750,
++    "height": 8117
++  },
++  "objects": [
++    {
++      "id": "segelboot",
++      "name": "Segelboot",
++      "depthMeters": 26.5,
++      "category": "Boot",
++      "x": 2815,
++      "y": 5460,
++      "description": "Das Segelboot ist auf der Tauchplatzkarte in 26,5 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "kanu",
++      "name": "Kanu",
++      "depthMeters": 36,
++      "category": "Boot",
++      "x": 2480,
++      "y": 4680,
++      "description": "Das Kanu ist auf der Tauchplatzkarte in 36 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "spiegel",
++      "name": "Spiegel",
++      "depthMeters": 36,
++      "category": "Objekt",
++      "x": 2660,
++      "y": 4505,
++      "description": "Der Spiegel ist auf der Tauchplatzkarte in 36 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "habitat",
++      "name": "Habitat",
++      "depthMeters": 35.3,
++      "category": "Bauwerk",
++      "x": 3250,
++      "y": 4580,
++      "description": "Das Habitat ist auf der Tauchplatzkarte in 35,3 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "weihnachtsmann",
++      "name": "Weihnachtsmann",
++      "depthMeters": 35,
++      "category": "Figur",
++      "x": 3570,
++      "y": 4710,
++      "description": "Der Weihnachtsmann ist auf der Tauchplatzkarte in 35 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "notrufsaeule",
++      "name": "Notrufsäule",
++      "depthMeters": 33.2,
++      "category": "Orientierungspunkt",
++      "x": 4075,
++      "y": 4685,
++      "description": "Die Notrufsäule ist auf der Tauchplatzkarte in 33,2 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "skelett-geruest",
++      "name": "Skelett-Gerüst",
++      "depthMeters": 35.5,
++      "category": "Übungsobjekt",
++      "x": 2620,
++      "y": 4865,
++      "description": "Das Skelett-Gerüst ist auf der Tauchplatzkarte in 35,5 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "polizist",
++      "name": "Polizist",
++      "depthMeters": 34.4,
++      "category": "Figur",
++      "x": 3575,
++      "y": 4955,
++      "description": "Der Polizist ist auf der Tauchplatzkarte in 34,4 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "kajak",
++      "name": "Kajak",
++      "depthMeters": 33.7,
++      "category": "Boot",
++      "x": 3750,
++      "y": 5050,
++      "description": "Das Kajak ist auf der Tauchplatzkarte in 33,7 m Tiefe eingezeichnet.",
++      "photos": []
++    },
++    {
++      "id": "pyramide",
++      "name": "Pyramide",
++      "depthMeters": 31.5,
++      "category": "Übungsobjekt",
++      "x": 3570,
++      "y": 5195,
++      "description": "Die Pyramide ist auf der Tauchplatzkarte in 31,5 m Tiefe eingezeichnet.",
++      "photos": []
++    }
++  ]
++}
+diff --git a/images/objects/README.md b/images/objects/README.md
+new file mode 100644
+index 0000000..09f0844
+--- /dev/null
++++ b/images/objects/README.md
+@@ -0,0 +1,28 @@
++# Objektfotos
++
++Fotos werden pro Tauchziel in einem eigenen Unterordner abgelegt, zum Beispiel:
++
++```text
++images/objects/segelboot/segelboot-01.jpg
++images/objects/segelboot/segelboot-02.jpg
++```
++
++Anschließend werden sie in `data/objects.json` beim jeweiligen Objekt ergänzt:
++
++```json
++"photos": [
++  {
++    "src": "images/objects/segelboot/segelboot-01.jpg",
++    "alt": "Segelboot auf dem Grund des Blausteinsees",
++    "caption": "Aufnahme von der Steuerbordseite"
++  }
++]
++```
++
++Empfehlungen:
++
++- JPEG oder WebP für Unterwasserfotos
++- etwa 1.600 bis 2.000 Pixel Breite
++- möglichst unter 500 KB pro Bild
++- aussagekräftiger Alternativtext
++- Urheber und Freigabe vor Veröffentlichung klären
+diff --git a/index.html b/index.html
+index 117565d..a4e73f2 100644
+--- a/index.html
++++ b/index.html
+@@ -21,9 +21,78 @@
+       <button id="zoom-in" type="button" title="Hineinzoomen" aria-label="Hineinzoomen">+</button>
+       <button id="zoom-out" type="button" title="Herauszoomen" aria-label="Herauszoomen">−</button>
+       <button id="home" type="button" title="Gesamte Karte anzeigen" aria-label="Gesamte Karte anzeigen">⌂</button>
++      <button id="objects-open" type="button" title="Tauchziele öffnen" aria-label="Tauchziele öffnen" aria-expanded="false">◎</button>
+       <button id="full-page" type="button" title="Vollbild umschalten" aria-label="Vollbild umschalten" aria-pressed="false">⛶</button>
+     </nav>
+ 
++    <aside id="object-panel" class="object-panel" aria-hidden="true" aria-label="Tauchziele">
++      <header class="panel-header">
++        <div>
++          <span class="eyebrow">Tauchplatzkarte</span>
++          <h2>Tauchziele</h2>
++        </div>
++        <button id="objects-close" class="icon-button" type="button" aria-label="Tauchziele schließen">×</button>
++      </header>
++
++      <section id="object-browser" class="object-browser">
++        <label class="search-field" for="object-search">
++          <span>Objekt suchen</span>
++          <input id="object-search" type="search" placeholder="z. B. Segelboot" autocomplete="off">
++        </label>
++
++        <label class="marker-toggle">
++          <input id="marker-visibility" type="checkbox" checked>
++          <span>Markierungen auf der Karte anzeigen</span>
++        </label>
++
++        <p id="object-count" class="object-count"></p>
++        <div id="object-list" class="object-list"></div>
++      </section>
++
++      <article id="object-detail" class="object-detail" hidden>
++        <button id="object-back" class="back-button" type="button">← Alle Tauchziele</button>
++
++        <div id="photo-stage" class="photo-stage" hidden>
++          <button id="photo-open" type="button" aria-label="Foto vergrößern">
++            <img id="object-photo" alt="">
++          </button>
++          <p id="photo-caption" class="photo-caption"></p>
++          <div id="photo-thumbnails" class="photo-thumbnails" aria-label="Weitere Fotos"></div>
++        </div>
++
++        <div id="photo-placeholder" class="photo-placeholder">
++          <span aria-hidden="true">▧</span>
++          <p>Noch kein Foto hinterlegt</p>
++        </div>
++
++        <div class="detail-heading">
++          <span id="object-category" class="category-badge"></span>
++          <h2 id="object-name"></h2>
++          <p id="object-depth" class="object-depth"></p>
++        </div>
++        <p id="object-description" class="object-description"></p>
++        <button id="object-link-copy" class="secondary-button" type="button">Link zu diesem Objekt kopieren</button>
++      </article>
++    </aside>
++
++    <section id="coordinate-editor" class="coordinate-editor" hidden aria-label="Objektkoordinaten erfassen">
++      <header>
++        <div>
++          <span class="eyebrow">Bearbeitungsmodus</span>
++          <h2>Objekt erfassen</h2>
++        </div>
++        <a href="./" aria-label="Bearbeitungsmodus schließen">×</a>
++      </header>
++      <p>Klicke auf die Position des Objekts in der Karte.</p>
++      <div class="editor-fields">
++        <label>Name <input id="editor-name" type="text" placeholder="Segelboot"></label>
++        <label>Tiefe in m <input id="editor-depth" type="number" min="0" max="100" step="0.1"></label>
++        <label>Kategorie <input id="editor-category" type="text" placeholder="Boot"></label>
++      </div>
++      <output id="coordinate-output">Noch keine Position gewählt.</output>
++      <button id="coordinate-copy" class="secondary-button" type="button" disabled>JSON-Eintrag kopieren</button>
++    </section>
++
+     <p id="status" class="status" role="status" aria-live="polite">Karte wird geladen …</p>
+ 
+     <aside class="usage-hint" aria-label="Bedienhinweis">
+@@ -36,6 +105,12 @@
+     </noscript>
+   </main>
+ 
++  <dialog id="photo-dialog" class="photo-dialog">
++    <button id="photo-dialog-close" class="icon-button" type="button" aria-label="Foto schließen">×</button>
++    <img id="photo-dialog-image" alt="">
++    <p id="photo-dialog-caption"></p>
++  </dialog>
++
+   <script src="vendor/openseadragon/openseadragon.min.js"></script>
+   <script src="viewer.js"></script>
+ </body>
+diff --git a/scripts/validate-project.mjs b/scripts/validate-project.mjs
+index bc3cf36..26b6a1f 100644
+--- a/scripts/validate-project.mjs
++++ b/scripts/validate-project.mjs
+@@ -7,6 +7,8 @@ const requiredFiles = [
+   "index.html",
+   "styles.css",
+   "viewer.js",
++  "data/objects.json",
++  "images/objects/README.md",
+   "map.dzi",
+   "vendor/openseadragon/openseadragon.min.js",
+   "vendor/openseadragon/LICENSE.txt"
+@@ -36,6 +38,69 @@ if (!formatMatch || formatMatch[1].toLowerCase() !== "png") {
+ const maxLevel = Math.ceil(Math.log2(Math.max(width, height)));
+ let checkedTiles = 0;
+ 
++const html = await readFile(path.join(root, "index.html"), "utf8");
++const htmlIds = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
++const duplicateIds = htmlIds.filter((id, index) => htmlIds.indexOf(id) !== index);
++if (duplicateIds.length > 0) {
++  throw new Error(`Doppelte HTML-IDs: ${[...new Set(duplicateIds)].join(", ")}`);
++}
++
++const requiredIds = [
++  "viewer",
++  "objects-open",
++  "object-panel",
++  "object-search",
++  "object-list",
++  "object-detail",
++  "photo-dialog",
++  "coordinate-editor"
++];
++for (const id of requiredIds) {
++  if (!htmlIds.includes(id)) {
++    throw new Error(`Benötigte HTML-ID fehlt: ${id}`);
++  }
++}
++
++const objectData = JSON.parse(await readFile(path.join(root, "data/objects.json"), "utf8"));
++if (objectData.schemaVersion !== 1 || !Array.isArray(objectData.objects)) {
++  throw new Error("data/objects.json hat ein ungültiges Schema.");
++}
++if (objectData.image?.width !== width || objectData.image?.height !== height) {
++  throw new Error("Die Bildgröße in data/objects.json stimmt nicht mit map.dzi überein.");
++}
++
++const objectIds = new Set();
++for (const object of objectData.objects) {
++  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(object.id)) {
++    throw new Error(`Ungültige Objekt-ID: ${object.id}`);
++  }
++  if (objectIds.has(object.id)) {
++    throw new Error(`Doppelte Objekt-ID: ${object.id}`);
++  }
++  objectIds.add(object.id);
++
++  if (!object.name || !object.category || !Number.isFinite(object.depthMeters)) {
++    throw new Error(`Unvollständiges Objekt: ${object.id}`);
++  }
++  if (!Number.isInteger(object.x) || !Number.isInteger(object.y)
++      || object.x < 0 || object.x > width || object.y < 0 || object.y > height) {
++    throw new Error(`Objektkoordinaten außerhalb der Karte: ${object.id}`);
++  }
++  if (!Array.isArray(object.photos)) {
++    throw new Error(`photos muss ein Array sein: ${object.id}`);
++  }
++
++  for (const photo of object.photos) {
++    if (!photo.src || !photo.alt) {
++      throw new Error(`Foto ohne src oder alt bei Objekt: ${object.id}`);
++    }
++    if (/^(?:https?:|\/)/.test(photo.src) || photo.src.includes("..")) {
++      throw new Error(`Foto muss einen sicheren relativen Pfad verwenden: ${photo.src}`);
++    }
++    await access(path.join(root, photo.src));
++  }
++}
++
+ for (let level = 0; level <= maxLevel; level += 1) {
+   const divisor = 2 ** (maxLevel - level);
+   const levelWidth = Math.ceil(width / divisor);
+@@ -80,5 +145,6 @@ for (let level = 0; level <= maxLevel; level += 1) {
+ 
+ console.log(
+   `Projektprüfung erfolgreich: ${width}x${height} Pixel, `
+-  + `${maxLevel + 1} Zoomstufen, ${checkedTiles} gültige Kacheln.`
++  + `${maxLevel + 1} Zoomstufen, ${checkedTiles} gültige Kacheln, `
++  + `${objectData.objects.length} interaktive Tauchziele.`
+ );
+diff --git a/styles.css b/styles.css
+index 0f23c3c..f3ac711 100644
+--- a/styles.css
++++ b/styles.css
+@@ -34,6 +34,11 @@ button {
+   font: inherit;
+ }
+ 
++button,
++input {
++  color: inherit;
++}
++
+ .map-shell {
+   position: relative;
+   isolation: isolate;
+@@ -121,6 +126,478 @@ h1 {
+   outline-offset: 1px;
+ }
+ 
++.toolbar button[aria-expanded="true"] {
++  background: rgba(142, 217, 255, 0.22);
++  color: #8ed9ff;
++}
++
++.object-panel {
++  position: absolute;
++  z-index: 30;
++  top: 78px;
++  right: max(14px, env(safe-area-inset-right));
++  bottom: max(14px, env(safe-area-inset-bottom));
++  display: flex;
++  width: min(380px, calc(100vw - 28px));
++  overflow: hidden;
++  flex-direction: column;
++  border: 1px solid rgba(255, 255, 255, 0.18);
++  border-radius: 16px;
++  background: rgba(11, 27, 43, 0.96);
++  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.38);
++  opacity: 0;
++  pointer-events: none;
++  transform: translateX(calc(100% + 30px));
++  transition: opacity 180ms ease, transform 220ms ease;
++  backdrop-filter: blur(16px);
++  -webkit-backdrop-filter: blur(16px);
++}
++
++.object-panel.is-open {
++  opacity: 1;
++  pointer-events: auto;
++  transform: translateX(0);
++}
++
++.panel-header,
++.coordinate-editor header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.panel-header {
++  flex: 0 0 auto;
++  padding: 17px 17px 14px;
++  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
++}
++
++.panel-header h2,
++.coordinate-editor h2,
++.detail-heading h2 {
++  margin: 0;
++  font-size: 1.2rem;
++  line-height: 1.2;
++}
++
++.icon-button {
++  display: inline-grid;
++  width: 40px;
++  height: 40px;
++  padding: 0;
++  place-items: center;
++  border: 0;
++  border-radius: 10px;
++  background: rgba(255, 255, 255, 0.08);
++  color: #f6fbff;
++  font-size: 1.45rem;
++  cursor: pointer;
++}
++
++.icon-button:hover,
++.icon-button:focus-visible {
++  background: rgba(142, 217, 255, 0.18);
++}
++
++.object-browser,
++.object-detail {
++  min-height: 0;
++  overflow: auto;
++  padding: 15px 17px 18px;
++  scrollbar-color: rgba(142, 217, 255, 0.45) transparent;
++}
++
++.search-field {
++  display: grid;
++  gap: 6px;
++  color: rgba(246, 251, 255, 0.78);
++  font-size: 0.78rem;
++  font-weight: 650;
++}
++
++.search-field input,
++.editor-fields input {
++  width: 100%;
++  min-height: 44px;
++  border: 1px solid rgba(255, 255, 255, 0.18);
++  border-radius: 10px;
++  outline: none;
++  background: rgba(255, 255, 255, 0.07);
++  color: #f6fbff;
++}
++
++.search-field input {
++  padding: 0 12px;
++  font-size: 0.95rem;
++}
++
++.search-field input::placeholder,
++.editor-fields input::placeholder {
++  color: rgba(246, 251, 255, 0.45);
++}
++
++.search-field input:focus,
++.editor-fields input:focus {
++  border-color: #8ed9ff;
++  box-shadow: 0 0 0 3px rgba(142, 217, 255, 0.15);
++}
++
++.marker-toggle {
++  display: flex;
++  align-items: center;
++  gap: 9px;
++  margin-top: 13px;
++  color: rgba(246, 251, 255, 0.78);
++  font-size: 0.8rem;
++  cursor: pointer;
++}
++
++.marker-toggle input {
++  width: 18px;
++  height: 18px;
++  accent-color: #8ed9ff;
++}
++
++.object-count {
++  margin: 17px 0 8px;
++  color: rgba(246, 251, 255, 0.58);
++  font-size: 0.75rem;
++}
++
++.object-list {
++  display: grid;
++  gap: 7px;
++}
++
++.object-list-button {
++  display: grid;
++  width: 100%;
++  grid-template-columns: minmax(0, 1fr) auto;
++  gap: 5px 12px;
++  padding: 11px 12px;
++  border: 1px solid rgba(255, 255, 255, 0.1);
++  border-radius: 11px;
++  background: rgba(255, 255, 255, 0.045);
++  color: #f6fbff;
++  text-align: left;
++  cursor: pointer;
++}
++
++.object-list-button:hover,
++.object-list-button:focus-visible {
++  border-color: rgba(142, 217, 255, 0.6);
++  background: rgba(142, 217, 255, 0.11);
++}
++
++.object-list-button strong {
++  overflow: hidden;
++  font-size: 0.93rem;
++  text-overflow: ellipsis;
++  white-space: nowrap;
++}
++
++.object-list-button .list-depth {
++  grid-column: 2;
++  grid-row: 1 / span 2;
++  align-self: center;
++  color: #8ed9ff;
++  font-size: 0.82rem;
++  font-weight: 700;
++}
++
++.object-list-button .list-category {
++  color: rgba(246, 251, 255, 0.58);
++  font-size: 0.73rem;
++}
++
++.empty-result {
++  margin: 24px 0;
++  color: rgba(246, 251, 255, 0.64);
++  font-size: 0.88rem;
++  text-align: center;
++}
++
++.back-button,
++.secondary-button {
++  border: 1px solid rgba(142, 217, 255, 0.32);
++  border-radius: 9px;
++  background: rgba(142, 217, 255, 0.1);
++  color: #d9f4ff;
++  cursor: pointer;
++}
++
++.back-button {
++  margin-bottom: 13px;
++  padding: 8px 10px;
++  border: 0;
++  background: transparent;
++}
++
++.back-button:hover,
++.back-button:focus-visible,
++.secondary-button:hover,
++.secondary-button:focus-visible {
++  background: rgba(142, 217, 255, 0.2);
++}
++
++.photo-stage,
++.photo-placeholder {
++  margin-bottom: 16px;
++  overflow: hidden;
++  border-radius: 12px;
++  background: rgba(255, 255, 255, 0.055);
++}
++
++.photo-stage > button {
++  display: block;
++  width: 100%;
++  padding: 0;
++  border: 0;
++  background: #071522;
++  cursor: zoom-in;
++}
++
++.photo-stage img {
++  display: block;
++  width: 100%;
++  max-height: 310px;
++  object-fit: contain;
++}
++
++.photo-caption {
++  margin: 0;
++  padding: 8px 11px 9px;
++  color: rgba(246, 251, 255, 0.65);
++  font-size: 0.75rem;
++}
++
++.photo-thumbnails {
++  display: flex;
++  gap: 7px;
++  overflow-x: auto;
++  padding: 0 10px 10px;
++}
++
++.photo-thumbnails button {
++  flex: 0 0 62px;
++  height: 48px;
++  overflow: hidden;
++  padding: 0;
++  border: 2px solid transparent;
++  border-radius: 7px;
++  background: #071522;
++  cursor: pointer;
++}
++
++.photo-thumbnails button.is-active {
++  border-color: #8ed9ff;
++}
++
++.photo-thumbnails img {
++  width: 100%;
++  height: 100%;
++  object-fit: cover;
++}
++
++.photo-placeholder {
++  display: grid;
++  min-height: 132px;
++  place-content: center;
++  color: rgba(246, 251, 255, 0.45);
++  text-align: center;
++}
++
++.photo-placeholder span {
++  font-size: 2rem;
++}
++
++.photo-placeholder p {
++  margin: 7px 0 0;
++  font-size: 0.8rem;
++}
++
++.category-badge {
++  display: inline-block;
++  margin-bottom: 7px;
++  padding: 4px 7px;
++  border-radius: 999px;
++  background: rgba(142, 217, 255, 0.14);
++  color: #8ed9ff;
++  font-size: 0.7rem;
++  font-weight: 700;
++  letter-spacing: 0.04em;
++  text-transform: uppercase;
++}
++
++.object-depth {
++  margin: 5px 0 0;
++  color: #8ed9ff;
++  font-size: 0.9rem;
++  font-weight: 700;
++}
++
++.object-description {
++  margin: 17px 0;
++  color: rgba(246, 251, 255, 0.77);
++  font-size: 0.9rem;
++  line-height: 1.55;
++}
++
++.secondary-button {
++  min-height: 42px;
++  padding: 8px 12px;
++}
++
++.map-marker {
++  display: grid;
++  width: 28px;
++  height: 28px;
++  padding: 0;
++  place-items: center;
++  border: 2px solid rgba(255, 255, 255, 0.94);
++  border-radius: 50%;
++  background: #f3b61f;
++  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.52);
++  cursor: pointer;
++  transition: transform 130ms ease, background-color 130ms ease;
++}
++
++.map-marker::after {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: #102338;
++  content: "";
++}
++
++.map-marker:hover,
++.map-marker:focus-visible,
++.map-marker.is-selected {
++  z-index: 2;
++  background: #8ed9ff;
++  transform: scale(1.25);
++}
++
++.map-marker.is-selected {
++  box-shadow: 0 0 0 6px rgba(142, 217, 255, 0.24), 0 3px 12px rgba(0, 0, 0, 0.52);
++}
++
++.map-shell.panel-open .navigator {
++  right: 408px !important;
++}
++
++.coordinate-editor {
++  position: absolute;
++  z-index: 35;
++  left: max(14px, env(safe-area-inset-left));
++  bottom: max(14px, env(safe-area-inset-bottom));
++  width: min(390px, calc(100vw - 28px));
++  max-height: calc(100vh - 100px);
++  overflow: auto;
++  padding: 15px;
++  border: 1px solid rgba(255, 255, 255, 0.18);
++  border-radius: 14px;
++  background: rgba(11, 27, 43, 0.96);
++  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.42);
++}
++
++.coordinate-editor header a {
++  display: grid;
++  width: 38px;
++  height: 38px;
++  place-items: center;
++  border-radius: 9px;
++  background: rgba(255, 255, 255, 0.08);
++  color: #f6fbff;
++  font-size: 1.35rem;
++  text-decoration: none;
++}
++
++.coordinate-editor > p {
++  margin: 12px 0;
++  color: rgba(246, 251, 255, 0.7);
++  font-size: 0.82rem;
++}
++
++.editor-fields {
++  display: grid;
++  grid-template-columns: 1fr 0.55fr;
++  gap: 9px;
++}
++
++.editor-fields label {
++  display: grid;
++  gap: 4px;
++  color: rgba(246, 251, 255, 0.66);
++  font-size: 0.72rem;
++}
++
++.editor-fields label:last-child {
++  grid-column: 1 / -1;
++}
++
++.editor-fields input {
++  min-height: 38px;
++  padding: 0 9px;
++  font-size: 0.84rem;
++}
++
++.coordinate-editor output {
++  display: block;
++  margin: 12px 0;
++  overflow: auto;
++  padding: 10px;
++  border-radius: 8px;
++  background: #071522;
++  color: #bdeaff;
++  font: 0.72rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
++  white-space: pre;
++}
++
++.coordinate-editor .secondary-button:disabled {
++  cursor: not-allowed;
++  opacity: 0.45;
++}
++
++.photo-dialog {
++  width: min(94vw, 1100px);
++  max-height: 92vh;
++  padding: 12px;
++  border: 1px solid rgba(255, 255, 255, 0.22);
++  border-radius: 14px;
++  background: #071522;
++  color: #f6fbff;
++  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.62);
++}
++
++.photo-dialog::backdrop {
++  background: rgba(0, 0, 0, 0.82);
++  backdrop-filter: blur(4px);
++}
++
++.photo-dialog .icon-button {
++  position: absolute;
++  z-index: 1;
++  top: 18px;
++  right: 18px;
++  background: rgba(7, 21, 34, 0.82);
++}
++
++.photo-dialog img {
++  display: block;
++  width: 100%;
++  max-height: calc(92vh - 80px);
++  object-fit: contain;
++}
++
++.photo-dialog p {
++  margin: 9px 5px 1px;
++  color: rgba(246, 251, 255, 0.72);
++  font-size: 0.8rem;
++  text-align: center;
++}
++
+ .status,
+ .usage-hint,
+ .error-card {
+@@ -230,6 +707,38 @@ h1 {
+     width: 82px !important;
+     height: 116px !important;
+   }
++
++  .object-panel {
++    top: auto;
++    left: max(8px, env(safe-area-inset-left));
++    right: max(8px, env(safe-area-inset-right));
++    bottom: max(8px, env(safe-area-inset-bottom));
++    width: auto;
++    max-height: min(68vh, 610px);
++    border-radius: 17px;
++    transform: translateY(calc(100% + 20px));
++  }
++
++  .object-panel.is-open {
++    transform: translateY(0);
++  }
++
++  .map-shell.panel-open .navigator {
++    opacity: 0;
++    pointer-events: none;
++  }
++
++  .map-marker {
++    width: 34px;
++    height: 34px;
++  }
++
++  .coordinate-editor {
++    right: max(8px, env(safe-area-inset-right));
++    left: max(8px, env(safe-area-inset-left));
++    bottom: max(8px, env(safe-area-inset-bottom));
++    width: auto;
++  }
+ }
+ 
+ @media (max-width: 520px) {
+@@ -243,6 +752,10 @@ h1 {
+   .usage-hint {
+     display: none;
+   }
++
++  .toolbar button {
++    width: 42px;
++  }
+ }
+ 
+ @media (prefers-reduced-motion: reduce) {
+diff --git a/viewer.js b/viewer.js
+index b33712e..0832531 100644
+--- a/viewer.js
++++ b/viewer.js
+@@ -1,10 +1,32 @@
+ (() => {
+   "use strict";
+ 
+-  const status = document.getElementById("status");
+-  const viewerElement = document.getElementById("viewer");
++  const byId = (id) => document.getElementById(id);
++  const status = byId("status");
++  const viewerElement = byId("viewer");
+   const mapShell = document.querySelector(".map-shell");
+-  const fullPageButton = document.getElementById("full-page");
++  const fullPageButton = byId("full-page");
++  const objectPanel = byId("object-panel");
++  const objectBrowser = byId("object-browser");
++  const objectDetail = byId("object-detail");
++  const objectSearch = byId("object-search");
++  const objectList = byId("object-list");
++  const objectCount = byId("object-count");
++  const markerVisibility = byId("marker-visibility");
++  const coordinateEditor = byId("coordinate-editor");
++  const coordinateOutput = byId("coordinate-output");
++  const coordinateCopy = byId("coordinate-copy");
++  const photoDialog = byId("photo-dialog");
++  const editorFields = [byId("editor-name"), byId("editor-depth"), byId("editor-category")];
++  const depthFormatter = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
++
++  let objects = [];
++  let objectById = new Map();
++  const markers = new Map();
++  let selectedObject = null;
++  let selectedPhoto = null;
++  let editorPoint = null;
++  let editorMarker = null;
+ 
+   if (!window.OpenSeadragon) {
+     status.textContent = "OpenSeadragon konnte nicht geladen werden.";
+@@ -41,14 +63,248 @@
+     }
+   });
+ 
++  const showStatus = (message, hideAfter = 0) => {
++    status.textContent = message;
++    status.classList.remove("is-hidden");
++    if (hideAfter > 0) {
++      window.setTimeout(() => status.classList.add("is-hidden"), hideAfter);
++    }
++  };
++
+   const zoomBy = (factor) => {
+     viewer.viewport.zoomBy(factor);
+     viewer.viewport.applyConstraints();
+   };
+ 
+-  document.getElementById("zoom-in").addEventListener("click", () => zoomBy(1.45));
+-  document.getElementById("zoom-out").addEventListener("click", () => zoomBy(1 / 1.45));
+-  document.getElementById("home").addEventListener("click", () => viewer.viewport.goHome());
++  const formatDepth = (depthMeters) => `${depthFormatter.format(depthMeters)} m`;
++
++  const normalize = (value) => value
++    .toLocaleLowerCase("de-DE")
++    .normalize("NFD")
++    .replace(/[\u0300-\u036f]/g, "");
++
++  const slugify = (value) => normalize(value)
++    .replace(/ß/g, "ss")
++    .replace(/[^a-z0-9]+/g, "-")
++    .replace(/^-|-$/g, "") || "neues-objekt";
++
++  const copyText = async (text) => {
++    if (navigator.clipboard && window.isSecureContext) {
++      await navigator.clipboard.writeText(text);
++      return;
++    }
++
++    const textArea = document.createElement("textarea");
++    textArea.value = text;
++    textArea.setAttribute("readonly", "");
++    textArea.style.position = "fixed";
++    textArea.style.opacity = "0";
++    document.body.append(textArea);
++    textArea.select();
++    document.execCommand("copy");
++    textArea.remove();
++  };
++
++  const openObjectPanel = ({ focusSearch = false } = {}) => {
++    objectPanel.classList.add("is-open");
++    objectPanel.setAttribute("aria-hidden", "false");
++    byId("objects-open").setAttribute("aria-expanded", "true");
++    mapShell.classList.add("panel-open");
++    if (focusSearch && !objectDetail.hidden) {
++      objectDetail.hidden = true;
++      objectBrowser.hidden = false;
++    }
++    if (focusSearch) {
++      window.setTimeout(() => objectSearch.focus(), 230);
++    }
++  };
++
++  const closeObjectPanel = () => {
++    objectPanel.classList.remove("is-open");
++    objectPanel.setAttribute("aria-hidden", "true");
++    byId("objects-open").setAttribute("aria-expanded", "false");
++    mapShell.classList.remove("panel-open");
++    byId("objects-open").focus();
++  };
++
++  const updateObjectUrl = (objectId) => {
++    const url = new URL(window.location.href);
++    if (objectId) {
++      url.searchParams.set("object", objectId);
++    } else {
++      url.searchParams.delete("object");
++    }
++    window.history.replaceState({}, "", url);
++  };
++
++  const setMarkerSelection = (objectId) => {
++    markers.forEach((marker, id) => {
++      marker.classList.toggle("is-selected", id === objectId);
++    });
++  };
++
++  const updateMarkerVisibility = () => {
++    markers.forEach((marker) => {
++      marker.hidden = !markerVisibility.checked;
++    });
++  };
++
++  const focusObjectOnMap = (object) => {
++    const bounds = viewer.viewport.imageToViewportRectangle(
++      object.x - 500,
++      object.y - 500,
++      1000,
++      1000
++    );
++    viewer.viewport.fitBounds(bounds, false);
++    viewer.viewport.applyConstraints();
++  };
++
++  const renderPhoto = (photo, index) => {
++    selectedPhoto = photo;
++    const image = byId("object-photo");
++    image.onerror = () => {
++      byId("photo-stage").hidden = true;
++      byId("photo-placeholder").hidden = false;
++      showStatus("Das Foto konnte nicht geladen werden.", 2200);
++    };
++    image.src = photo.src;
++    image.alt = photo.alt || selectedObject.name;
++    byId("photo-caption").textContent = photo.caption || "";
++
++    byId("photo-thumbnails").querySelectorAll("button").forEach((button, buttonIndex) => {
++      button.classList.toggle("is-active", buttonIndex === index);
++      button.setAttribute("aria-current", buttonIndex === index ? "true" : "false");
++    });
++  };
++
++  const renderPhotos = (object) => {
++    const photos = Array.isArray(object.photos) ? object.photos : [];
++    const stage = byId("photo-stage");
++    const placeholder = byId("photo-placeholder");
++    const thumbnails = byId("photo-thumbnails");
++    thumbnails.replaceChildren();
++    selectedPhoto = null;
++
++    if (photos.length === 0) {
++      stage.hidden = true;
++      placeholder.hidden = false;
++      return;
++    }
++
++    stage.hidden = false;
++    placeholder.hidden = true;
++    thumbnails.hidden = photos.length < 2;
++
++    photos.forEach((photo, index) => {
++      const button = document.createElement("button");
++      button.type = "button";
++      button.setAttribute("aria-label", `Foto ${index + 1} von ${object.name} anzeigen`);
++      const image = document.createElement("img");
++      image.src = photo.src;
++      image.alt = "";
++      button.append(image);
++      button.addEventListener("click", () => renderPhoto(photo, index));
++      thumbnails.append(button);
++    });
++
++    renderPhoto(photos[0], 0);
++  };
++
++  const renderObjectDetail = (object) => {
++    byId("object-name").textContent = object.name;
++    byId("object-depth").textContent = `Tiefe: ${formatDepth(object.depthMeters)}`;
++    byId("object-category").textContent = object.category;
++    byId("object-description").textContent = object.description || "Für dieses Tauchziel liegt noch keine Beschreibung vor.";
++    renderPhotos(object);
++    objectBrowser.hidden = true;
++    objectDetail.hidden = false;
++  };
++
++  const selectObject = (objectId, { focusMap = true, updateUrl = true } = {}) => {
++    const object = objectById.get(objectId);
++    if (!object) {
++      return;
++    }
++
++    selectedObject = object;
++    setMarkerSelection(object.id);
++    renderObjectDetail(object);
++    openObjectPanel();
++    if (focusMap) {
++      focusObjectOnMap(object);
++    }
++    if (updateUrl) {
++      updateObjectUrl(object.id);
++    }
++  };
++
++  const renderObjectList = () => {
++    const query = normalize(objectSearch.value.trim());
++    const matchingObjects = objects
++      .filter((object) => normalize(`${object.name} ${object.category} ${object.depthMeters}`).includes(query))
++      .sort((left, right) => left.name.localeCompare(right.name, "de"));
++
++    objectCount.textContent = query
++      ? `${matchingObjects.length} von ${objects.length} Tauchzielen`
++      : `${objects.length} Tauchziele`;
++    objectList.replaceChildren();
++
++    if (matchingObjects.length === 0) {
++      const empty = document.createElement("p");
++      empty.className = "empty-result";
++      empty.textContent = "Kein passendes Tauchziel gefunden.";
++      objectList.append(empty);
++      return;
++    }
++
++    matchingObjects.forEach((object) => {
++      const button = document.createElement("button");
++      button.type = "button";
++      button.className = "object-list-button";
++      button.innerHTML = "<strong></strong><span class=\"list-category\"></span><span class=\"list-depth\"></span>";
++      button.querySelector("strong").textContent = object.name;
++      button.querySelector(".list-category").textContent = object.category;
++      button.querySelector(".list-depth").textContent = formatDepth(object.depthMeters);
++      button.addEventListener("click", () => selectObject(object.id));
++      objectList.append(button);
++    });
++  };
++
++  const addObjectMarkers = () => {
++    objects.forEach((object) => {
++      const marker = document.createElement("button");
++      marker.type = "button";
++      marker.className = "map-marker";
++      marker.setAttribute("aria-label", `${object.name}, ${formatDepth(object.depthMeters)}`);
++      marker.title = `${object.name} · ${formatDepth(object.depthMeters)}`;
++      marker.addEventListener("click", (event) => {
++        event.stopPropagation();
++        selectObject(object.id);
++      });
++
++      viewer.addOverlay({
++        element: marker,
++        location: viewer.viewport.imageToViewportCoordinates(object.x, object.y),
++        placement: OpenSeadragon.Placement.CENTER,
++        checkResize: false
++      });
++      markers.set(object.id, marker);
++    });
++    updateMarkerVisibility();
++  };
++
++  const loadObjectData = async () => {
++    const response = await fetch("data/objects.json");
++    if (!response.ok) {
++      throw new Error(`Objektdaten konnten nicht geladen werden: HTTP ${response.status}`);
++    }
++    const data = await response.json();
++    if (!data || !Array.isArray(data.objects)) {
++      throw new Error("Objektdaten haben ein ungültiges Format.");
++    }
++    return data.objects;
++  };
+ 
+   const toggleFullScreen = async () => {
+     if (!document.fullscreenEnabled || !mapShell.requestFullscreen) {
+@@ -62,6 +318,122 @@
+     }
+   };
+ 
++  const editorObject = () => {
++    if (!editorPoint) {
++      return null;
++    }
++    const name = byId("editor-name").value.trim() || "Neues Objekt";
++    const depth = Number.parseFloat(byId("editor-depth").value);
++    return {
++      id: slugify(name),
++      name,
++      depthMeters: Number.isFinite(depth) ? depth : 0,
++      category: byId("editor-category").value.trim() || "Objekt",
++      x: editorPoint.x,
++      y: editorPoint.y,
++      description: "",
++      photos: []
++    };
++  };
++
++  const renderEditorOutput = () => {
++    const object = editorObject();
++    if (!object) {
++      coordinateOutput.textContent = "Noch keine Position gewählt.";
++      coordinateCopy.disabled = true;
++      return;
++    }
++    coordinateOutput.textContent = JSON.stringify(object, null, 2);
++    coordinateCopy.disabled = false;
++  };
++
++  const enableCoordinateEditor = () => {
++    coordinateEditor.hidden = false;
++    viewer.addHandler("canvas-click", (event) => {
++      if (!event.quick) {
++        return;
++      }
++      const image = viewer.world.getItemAt(0);
++      const viewportPoint = viewer.viewport.pointFromPixel(event.position);
++      const imagePoint = image.viewportToImageCoordinates(viewportPoint);
++      const x = Math.round(imagePoint.x);
++      const y = Math.round(imagePoint.y);
++
++      if (x < 0 || y < 0 || x > image.getContentSize().x || y > image.getContentSize().y) {
++        return;
++      }
++
++      event.preventDefaultAction = true;
++      editorPoint = { x, y };
++      const markerLocation = image.imageToViewportCoordinates(x, y);
++      if (!editorMarker) {
++        editorMarker = document.createElement("span");
++        editorMarker.className = "map-marker is-selected";
++        editorMarker.setAttribute("aria-hidden", "true");
++        viewer.addOverlay({
++          element: editorMarker,
++          location: markerLocation,
++          placement: OpenSeadragon.Placement.CENTER,
++          checkResize: false
++        });
++      } else {
++        viewer.updateOverlay(editorMarker, markerLocation, OpenSeadragon.Placement.CENTER);
++      }
++      renderEditorOutput();
++    });
++
++    editorFields.forEach((field) => field.addEventListener("input", renderEditorOutput));
++    coordinateCopy.addEventListener("click", async () => {
++      await copyText(coordinateOutput.textContent);
++      showStatus("JSON-Eintrag kopiert", 1800);
++    });
++  };
++
++  byId("zoom-in").addEventListener("click", () => zoomBy(1.45));
++  byId("zoom-out").addEventListener("click", () => zoomBy(1 / 1.45));
++  byId("home").addEventListener("click", () => viewer.viewport.goHome());
++  byId("objects-open").addEventListener("click", () => {
++    if (objectPanel.classList.contains("is-open")) {
++      closeObjectPanel();
++    } else {
++      openObjectPanel({ focusSearch: true });
++    }
++  });
++  byId("objects-close").addEventListener("click", closeObjectPanel);
++  byId("object-back").addEventListener("click", () => {
++    objectDetail.hidden = true;
++    objectBrowser.hidden = false;
++    objectSearch.focus();
++  });
++  objectSearch.addEventListener("input", renderObjectList);
++  markerVisibility.addEventListener("change", updateMarkerVisibility);
++
++  byId("object-link-copy").addEventListener("click", async () => {
++    if (!selectedObject) {
++      return;
++    }
++    const url = new URL(window.location.href);
++    url.searchParams.set("object", selectedObject.id);
++    await copyText(url.href);
++    showStatus("Objektlink kopiert", 1800);
++  });
++
++  byId("photo-open").addEventListener("click", () => {
++    if (!selectedPhoto) {
++      return;
++    }
++    byId("photo-dialog-image").src = selectedPhoto.src;
++    byId("photo-dialog-image").alt = selectedPhoto.alt || selectedObject.name;
++    byId("photo-dialog-caption").textContent = selectedPhoto.caption || "";
++    photoDialog.showModal();
++  });
++  byId("photo-dialog-close").addEventListener("click", () => photoDialog.close());
++  photoDialog.addEventListener("click", (event) => {
++    if (event.target === photoDialog) {
++      photoDialog.close();
++    }
++  });
++
+   if (document.fullscreenEnabled && mapShell.requestFullscreen) {
+     fullPageButton.addEventListener("click", () => {
+       toggleFullScreen().catch((error) => console.error("Fullscreen fehlgeschlagen", error));
+@@ -76,19 +448,49 @@
+     viewer.viewport.applyConstraints();
+   });
+ 
+-  viewer.addHandler("open", () => {
+-    status.textContent = "Karte geladen";
+-    window.setTimeout(() => status.classList.add("is-hidden"), 900);
++  viewer.addHandler("open", async () => {
+     viewerElement.setAttribute("tabindex", "0");
++    showStatus("Karte geladen", 900);
++
++    try {
++      objects = await loadObjectData();
++      objectById = new Map(objects.map((object) => [object.id, object]));
++      renderObjectList();
++      addObjectMarkers();
++
++      const params = new URLSearchParams(window.location.search);
++      const requestedObject = params.get("object");
++      if (requestedObject && objectById.has(requestedObject)) {
++        selectObject(requestedObject, { updateUrl: false });
++      }
++      if (params.get("edit") === "1") {
++        enableCoordinateEditor();
++      }
++    } catch (error) {
++      console.error(error);
++      showStatus("Die interaktiven Objektdaten konnten nicht geladen werden.");
++      byId("objects-open").disabled = true;
++    }
+   });
+ 
+   viewer.addHandler("open-failed", (event) => {
+-    status.textContent = "Die Kartenkacheln konnten nicht geladen werden.";
+-    status.classList.remove("is-hidden");
++    showStatus("Die Kartenkacheln konnten nicht geladen werden.");
+     console.error("OpenSeadragon open-failed", event);
+   });
+ 
+   document.addEventListener("keydown", (event) => {
++    const target = event.target;
++    if (target instanceof HTMLElement && (target.matches("input, textarea, select") || target.isContentEditable)) {
++      return;
++    }
++
++    // Das Dialog-Element verarbeitet Escape selbst. Die Objektansicht soll
++    // dabei geöffnet bleiben, damit man nach dem Foto zur Beschreibung
++    // zurückkehrt.
++    if (event.key === "Escape" && photoDialog.open) {
++      return;
++    }
++
+     if (event.key === "+" || event.key === "=") {
+       zoomBy(1.45);
+     } else if (event.key === "-") {
+@@ -97,6 +499,8 @@
+       viewer.viewport.goHome();
+     } else if (event.key.toLowerCase() === "f") {
+       toggleFullScreen().catch((error) => console.error("Fullscreen fehlgeschlagen", error));
++    } else if (event.key === "Escape" && objectPanel.classList.contains("is-open")) {
++      closeObjectPanel();
+     } else {
+       return;
+     }

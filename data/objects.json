@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "image": {
+    "width": 5750,
+    "height": 8117
+  },
+  "objects": [
+    {
+      "id": "segelboot",
+      "name": "Segelboot",
+      "depthMeters": 26.5,
+      "category": "Boot",
+      "x": 2815,
+      "y": 5460,
+      "description": "Das Segelboot ist auf der Tauchplatzkarte in 26,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "kanu",
+      "name": "Kanu",
+      "depthMeters": 36,
+      "category": "Boot",
+      "x": 2480,
+      "y": 4680,
+      "description": "Das Kanu ist auf der Tauchplatzkarte in 36 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "spiegel",
+      "name": "Spiegel",
+      "depthMeters": 36,
+      "category": "Objekt",
+      "x": 2660,
+      "y": 4505,
+      "description": "Der Spiegel ist auf der Tauchplatzkarte in 36 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "habitat",
+      "name": "Habitat",
+      "depthMeters": 35.3,
+      "category": "Bauwerk",
+      "x": 3250,
+      "y": 4580,
+      "description": "Das Habitat ist auf der Tauchplatzkarte in 35,3 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "weihnachtsmann",
+      "name": "Weihnachtsmann",
+      "depthMeters": 35,
+      "category": "Figur",
+      "x": 3570,
+      "y": 4710,
+      "description": "Der Weihnachtsmann ist auf der Tauchplatzkarte in 35 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "notrufsaeule",
+      "name": "Notrufsäule",
+      "depthMeters": 33.2,
+      "category": "Orientierungspunkt",
+      "x": 4075,
+      "y": 4685,
+      "description": "Die Notrufsäule ist auf der Tauchplatzkarte in 33,2 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "skelett-geruest",
+      "name": "Skelett-Gerüst",
+      "depthMeters": 35.5,
+      "category": "Übungsobjekt",
+      "x": 2620,
+      "y": 4865,
+      "description": "Das Skelett-Gerüst ist auf der Tauchplatzkarte in 35,5 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "polizist",
+      "name": "Polizist",
+      "depthMeters": 34.4,
+      "category": "Figur",
+      "x": 3575,
+      "y": 4955,
+      "description": "Der Polizist ist auf der Tauchplatzkarte in 34,4 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "kajak",
+      "name": "Kajak",
+      "depthMeters": 33.7,
+      "category": "Boot",
+      "x": 3750,
+      "y": 5050,
+      "description": "Das Kajak ist auf der Tauchplatzkarte in 33,7 m Tiefe eingezeichnet.",
+      "photos": []
+    },
+    {
+      "id": "pyramide",
+      "name": "Pyramide",
+      "depthMeters": 31.5,
+      "category": "Übungsobjekt",
+      "x": 3570,
+      "y": 5195,
+      "description": "Die Pyramide ist auf der Tauchplatzkarte in 31,5 m Tiefe eingezeichnet.",
+      "photos": []
+    }
+  ]
+}

@@ -58,6 +58,48 @@ https://BENUTZERNAME.github.io/REPOSITORYNAME/
 - `+` / `-`: Zoom ändern
 - `0`: gesamte Karte anzeigen
 - `F`: Vollbildansicht umschalten
+- `◎`: Tauchziele öffnen und durchsuchen
+- gelbe Markierung: Informationen zum Tauchziel anzeigen
+
+Direkte Links zu einzelnen Objekten funktionieren über den Query-Parameter
+`object`, zum Beispiel:
+
+```text
+https://BENUTZERNAME.github.io/REPOSITORYNAME/?object=segelboot
+```
+
+## Interaktive Tauchziele pflegen
+
+Die Tauchziele stehen getrennt von der Karte in `data/objects.json`. Koordinaten
+beziehen sich auf das 5.750 x 8.117 Pixel große Kartenbild. Änderungen an der
+JSON-Datei benötigen keine Neuerzeugung der Kartenkacheln.
+
+Zum Erfassen einer neuen Position die Karte lokal mit `?edit=1` öffnen:
+
+```text
+http://localhost:8080/?edit=1
+```
+
+Nach einem Klick auf die Karte erzeugt der Bearbeitungsmodus einen JSON-Eintrag,
+der nach `data/objects.json` kopiert werden kann.
+
+### Fotos zu einem Tauchziel ergänzen
+
+Fotos werden unter `images/objects/<objekt-id>/` abgelegt und beim Objekt als
+optionale Liste eingetragen:
+
+```json
+"photos": [
+  {
+    "src": "images/objects/segelboot/segelboot-01.jpg",
+    "alt": "Segelboot auf dem Grund des Blausteinsees",
+    "caption": "Aufnahme von der Steuerbordseite"
+  }
+]
+```
+
+Mehrere Bilder werden als Galerie dargestellt und lassen sich vergrößern. Eine
+ausführlichere Anleitung steht in `images/objects/README.md`.
 
 ## Karte später aus dem Originalmaterial neu erzeugen
 
@@ -95,6 +137,8 @@ npm test
 index.html                 Viewer-Seite
 styles.css                 Responsive Darstellung
 viewer.js                  OpenSeadragon-Konfiguration
+data/objects.json          Tauchziele, Koordinaten und Fotoreferenzen
+images/objects/            Objektfotos und Fotoanleitung
 map.dzi                    Beschreibung der Kachelpyramide
 map_files/                 Kartenkacheln je Zoomstufe
 vendor/openseadragon/      Lokale OpenSeadragon-Laufzeit
