@@ -159,7 +159,9 @@
     }
 
     const zoomRatio = Math.max(1, zoom / homeZoom);
-    const markerSize = Math.min(28, 10 + Math.log2(zoomRatio) * 9);
+    // Der sichtbare Kreis bleibt bewusst klein. Die deutlich größere
+    // Schaltfläche in CSS erhält trotzdem eine zuverlässige Touch-Klickfläche.
+    const markerSize = Math.min(20, 7 + Math.log2(zoomRatio) * 6);
     viewerElement.style.setProperty("--marker-visual-size", `${markerSize.toFixed(1)}px`);
   };
 

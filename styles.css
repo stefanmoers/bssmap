@@ -476,18 +476,18 @@ h1 {
 
 .map-marker::before {
   box-sizing: border-box;
-  width: var(--marker-visual-size, 10px);
-  height: var(--marker-visual-size, 10px);
-  border: 2px solid rgba(255, 255, 255, 0.94);
-  background: #f3b61f;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+  width: var(--marker-visual-size, 7px);
+  height: var(--marker-visual-size, 7px);
+  border: 1.5px solid rgba(255, 255, 255, 0.88);
+  background: rgba(243, 182, 31, 0.52);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.34);
   transition: width 100ms linear, height 100ms linear, transform 130ms ease, background-color 130ms ease;
 }
 
 .map-marker::after {
-  width: clamp(2px, calc(var(--marker-visual-size, 10px) * 0.21), 6px);
-  height: clamp(2px, calc(var(--marker-visual-size, 10px) * 0.21), 6px);
-  background: #102338;
+  width: clamp(1.5px, calc(var(--marker-visual-size, 7px) * 0.19), 4px);
+  height: clamp(1.5px, calc(var(--marker-visual-size, 7px) * 0.19), 4px);
+  background: rgba(16, 35, 56, 0.72);
 }
 
 .map-marker:hover,
@@ -499,12 +499,12 @@ h1 {
 .map-marker:hover::before,
 .map-marker:focus-visible::before,
 .map-marker.is-selected::before {
-  background: #8ed9ff;
-  transform: scale(1.2);
+  background: rgba(142, 217, 255, 0.82);
+  transform: scale(1.15);
 }
 
 .map-marker.is-selected::before {
-  box-shadow: 0 0 0 6px rgba(142, 217, 255, 0.24), 0 3px 12px rgba(0, 0, 0, 0.52);
+  box-shadow: 0 0 0 4px rgba(142, 217, 255, 0.22), 0 2px 8px rgba(0, 0, 0, 0.42);
 }
 
 .map-marker:focus-visible {
