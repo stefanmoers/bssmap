@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102338">
+  <meta name="description" content="Interaktive Tauchplatzkarte des Blausteinsees">
+  <title>Tauchplatzkarte Blausteinsee</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="map-shell" aria-label="Tauchplatzkarte Blausteinsee">
+    <div id="viewer" class="viewer" aria-label="Zoombare Tauchplatzkarte"></div>
+
+    <header class="title-card">
+      <span class="eyebrow">Interaktive Karte</span>
+      <h1>Tauchplatzkarte Blausteinsee</h1>
+    </header>
+
+    <nav class="toolbar" aria-label="Kartensteuerung">
+      <button id="zoom-in" type="button" title="Hineinzoomen" aria-label="Hineinzoomen">+</button>
+      <button id="zoom-out" type="button" title="Herauszoomen" aria-label="Herauszoomen">−</button>
+      <button id="home" type="button" title="Gesamte Karte anzeigen" aria-label="Gesamte Karte anzeigen">⌂</button>
+      <button id="full-page" type="button" title="Vollbild umschalten" aria-label="Vollbild umschalten" aria-pressed="false">⛶</button>
+    </nav>
+
+    <p id="status" class="status" role="status" aria-live="polite">Karte wird geladen …</p>
+
+    <aside class="usage-hint" aria-label="Bedienhinweis">
+      <span class="desktop-hint">Ziehen zum Verschieben · Mausrad zum Zoomen</span>
+      <span class="touch-hint">Mit zwei Fingern zoomen · Ziehen zum Verschieben</span>
+    </aside>
+
+    <noscript>
+      <p class="error-card">Für die interaktive Karte muss JavaScript aktiviert sein.</p>
+    </noscript>
+  </main>
+
+  <script src="vendor/openseadragon/openseadragon.min.js"></script>
+  <script src="viewer.js"></script>
+</body>
+</html>

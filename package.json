@@ -1,0 +1,16 @@
+{
+  "name": "blausteinsee-openseadragon-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Statischer OpenSeadragon-Viewer fuer die Tauchplatzkarte Blausteinsee",
+  "type": "module",
+  "scripts": {
+    "generate-tiles": "node scripts/generate-tiles.mjs",
+    "copy-vendor": "node scripts/copy-vendor.mjs",
+    "test": "node --check viewer.js && node scripts/validate-project.mjs"
+  },
+  "devDependencies": {
+    "openseadragon": "6.1.0",
+    "sharp": "0.35.3"
+  }
+}
