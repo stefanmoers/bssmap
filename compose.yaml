@@ -1,0 +1,15 @@
+services:
+  bssmap:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      BSSMAP_SECURE_COOKIES: "${BSSMAP_SECURE_COOKIES:-false}"
+      BSSMAP_PUBLIC_ORIGIN: "${BSSMAP_PUBLIC_ORIGIN:-}"
+    volumes:
+      - bssmap-data:/data
+    restart: unless-stopped
+
+volumes:
+  bssmap-data:
+
