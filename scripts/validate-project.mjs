@@ -4,14 +4,23 @@ import sharp from "sharp";
 
 const root = path.resolve(".");
 const requiredFiles = [
+  ".env.example",
+  "Dockerfile",
+  "compose.yaml",
   "index.html",
   "styles.css",
   "viewer.js",
+  "runtime-config.json",
   "data/maps.json",
   "data/objects.json",
   "images/objects/README.md",
   "maps/object-map/map.dzi",
   "maps/detail-map/map.dzi",
+  "server/app.mjs",
+  "server/cli.mjs",
+  "server/database.mjs",
+  "server/manage-users.mjs",
+  "server/security.mjs",
   "vendor/openseadragon/openseadragon.min.js",
   "vendor/openseadragon/LICENSE.txt"
 ];
@@ -29,11 +38,16 @@ const requiredIds = [
   "viewer",
   "map-switcher",
   "objects-open",
+  "server-access",
   "object-panel",
   "object-search",
   "object-list",
   "object-detail",
+  "object-editor-actions",
+  "description-form",
+  "photo-upload-form",
   "photo-dialog",
+  "server-dialog",
   "coordinate-editor",
   "editor-close"
 ];
@@ -41,6 +55,11 @@ for (const id of requiredIds) {
   if (!htmlIds.includes(id)) {
     throw new Error(`Benötigte HTML-ID fehlt: ${id}`);
   }
+}
+
+const runtimeConfig = JSON.parse(await readFile(path.join(root, "runtime-config.json"), "utf8"));
+if (runtimeConfig.serverFeatures !== false || runtimeConfig.apiBaseUrl !== "") {
+  throw new Error("runtime-config.json muss für GitHub Pages die Serverfunktionen deaktivieren.");
 }
 
 const isSafeRelativePath = (value) => typeof value === "string"

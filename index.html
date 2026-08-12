@@ -27,6 +27,7 @@
       <button id="zoom-out" type="button" title="Herauszoomen" aria-label="Herauszoomen">−</button>
       <button id="home" type="button" title="Gesamte Karte anzeigen" aria-label="Gesamte Karte anzeigen">⌂</button>
       <button id="objects-open" type="button" title="Tauchziele öffnen" aria-label="Tauchziele öffnen" aria-expanded="false">◎</button>
+      <button id="server-access" type="button" title="Redaktion öffnen" aria-label="Redaktion öffnen" hidden>✎</button>
       <button id="full-page" type="button" title="Vollbild umschalten" aria-label="Vollbild umschalten" aria-pressed="false">⛶</button>
     </nav>
 
@@ -63,6 +64,7 @@
           </button>
           <p id="photo-caption" class="photo-caption"></p>
           <div id="photo-thumbnails" class="photo-thumbnails" aria-label="Weitere Fotos"></div>
+          <button id="photo-delete" class="danger-button photo-delete" type="button" hidden>Ausgewähltes Foto löschen</button>
         </div>
 
         <div id="photo-placeholder" class="photo-placeholder">
@@ -76,7 +78,35 @@
           <p id="object-depth" class="object-depth"></p>
         </div>
         <p id="object-description" class="object-description"></p>
-        <button id="object-link-copy" class="secondary-button" type="button">Link zu diesem Objekt kopieren</button>
+
+        <form id="description-form" class="editor-form" hidden>
+          <label for="description-input">Beschreibung bearbeiten</label>
+          <textarea id="description-input" maxlength="4000" rows="7" required></textarea>
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Beschreibung speichern</button>
+            <button id="description-cancel" class="secondary-button" type="button">Abbrechen</button>
+          </div>
+        </form>
+
+        <form id="photo-upload-form" class="editor-form" hidden>
+          <label for="photo-file">Foto auswählen</label>
+          <input id="photo-file" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+          <p class="form-hint">JPEG, PNG oder WebP, maximal 10 MB</p>
+          <label for="photo-alt">Alternativtext</label>
+          <input id="photo-alt" name="alt" type="text" maxlength="300" required placeholder="Was ist auf dem Foto zu sehen?">
+          <label for="photo-upload-caption">Bildunterschrift</label>
+          <textarea id="photo-upload-caption" name="caption" maxlength="1000" rows="3"></textarea>
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Foto hochladen</button>
+            <button id="photo-upload-cancel" class="secondary-button" type="button">Abbrechen</button>
+          </div>
+        </form>
+
+        <div id="object-editor-actions" class="object-editor-actions" hidden>
+          <button id="description-edit" class="secondary-button" type="button">Beschreibung bearbeiten</button>
+          <button id="photo-upload-open" class="secondary-button" type="button">Foto hochladen</button>
+        </div>
+        <button id="object-link-copy" class="secondary-button object-link-button" type="button">Link zu diesem Objekt kopieren</button>
       </article>
     </aside>
 
@@ -114,6 +144,33 @@
     <button id="photo-dialog-close" class="icon-button" type="button" aria-label="Foto schließen">×</button>
     <img id="photo-dialog-image" alt="">
     <p id="photo-dialog-caption"></p>
+  </dialog>
+
+  <dialog id="server-dialog" class="server-dialog">
+    <header>
+      <div>
+        <span class="eyebrow">Geschützter Bereich</span>
+        <h2>Redaktion</h2>
+      </div>
+      <button id="server-dialog-close" class="icon-button" type="button" aria-label="Redaktion schließen">×</button>
+    </header>
+
+    <form id="login-form" class="login-form">
+      <p>Bitte mit einem freigeschalteten Redaktionskonto anmelden.</p>
+      <label for="login-username">Benutzername</label>
+      <input id="login-username" name="username" type="text" autocomplete="username" required>
+      <label for="login-password">Passwort</label>
+      <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+      <p id="login-error" class="form-error" role="alert" hidden></p>
+      <button class="primary-button" type="submit">Anmelden</button>
+    </form>
+
+    <section id="session-view" class="session-view" hidden>
+      <p>Angemeldet als <strong id="session-username"></strong></p>
+      <p id="session-role" class="form-hint"></p>
+      <p>Öffne ein Tauchziel, um seine Beschreibung zu bearbeiten oder ein Foto hochzuladen.</p>
+      <button id="logout" class="secondary-button" type="button">Abmelden</button>
+    </section>
   </dialog>
 
   <script src="vendor/openseadragon/openseadragon.min.js"></script>

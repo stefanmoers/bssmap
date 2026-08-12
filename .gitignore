@@ -1,5 +1,7 @@
 node_modules/
 tmp/
+var/
+.env
 source-map.png
 *.log
 .DS_Store

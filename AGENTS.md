@@ -15,9 +15,11 @@ interaktive Webkarten bereit. Große Karten werden nicht als PDF im Browser
 angezeigt, sondern als Deep-Zoom-Kacheln geladen. Dadurch sollen Zoomen und
 Verschieben auf Desktop-PCs, Tablets und Mobiltelefonen flüssig funktionieren.
 
-Der Viewer ist eine vollständig statische Website und wird über GitHub Pages
-ausgeliefert. Es gibt keinen Server, keine Datenbank und keinen
-Anwendungs-Build zur Laufzeit.
+Der Viewer bleibt als statische Website vollständig über GitHub Pages
+nutzbar. Optional kann derselbe Stand über den enthaltenen Node-Server
+ausgeliefert werden. Der Server ergänzt Anmeldung, SQLite-basierte
+Inhaltsänderungen und Foto-Uploads; Karten und statische Inhalte dürfen niemals
+von seiner Verfügbarkeit abhängen.
 
 Die wichtigsten Nutzerfunktionen sind:
 
@@ -26,6 +28,8 @@ Die wichtigsten Nutzerfunktionen sind:
 - Tauchziele durchsuchen und nach Name sortiert auflisten
 - Detailansicht mit Name, Tiefe, Kategorie und Beschreibung öffnen
 - optionale Unterwasserfotos als Galerie und vergrößert anzeigen
+- Beschreibungen im Servermodus durch Redakteure bearbeiten
+- Objektfotos im Servermodus hochladen und verwalten
 - zwischen Objektkarte und Detailkarte ohne Seitenreload umschalten
 - direkte Links über `?map=<id>&object=<id>` verwenden
 - kartenspezifische Objektkoordinaten lokal über `?edit=1` erfassen
@@ -47,6 +51,9 @@ Zum Zeitpunkt der Aktualisierung sind zwei Karten umgesetzt:
 - Objektdaten: `data/objects.json`
 - insgesamt 67 kanonische Tauchziele
 - Fotos sind unter anderem für Fahrrad, M&M und Segelboot hinterlegt
+- optionaler Redaktionsserver unter `server/`
+- persistente Serverdaten unter dem nicht versionierten Verzeichnis `var/`
+- statische Laufzeitkonfiguration: `runtime-config.json`
 
 Verlasse dich bei automatisch prüfbaren Zahlen nicht ausschließlich auf diesen
 Text. `npm test` und die tatsächlich vorhandenen Daten sind die maßgebliche
@@ -123,16 +130,23 @@ Das Projekt verwendet bewusst wenige Bausteine:
 - `data/maps.json`: Kartendefinitionen und Standardansichten
 - `data/objects.json`: Objektmetadaten, Koordinaten und Fotoreferenzen
 - `images/objects/`: Unterwasserfotos
+- `runtime-config.json`: deaktiviert Redaktionsfunktionen auf GitHub Pages
 - `maps/object-map/`: DZI und Kacheln der Objektkarte
 - `maps/detail-map/`: DZI und Kacheln der Detailkarte
 - `vendor/openseadragon/`: lokal ausgelieferte Bibliothek und Bedienelemente
 - `scripts/generate-tiles.mjs`: reproduzierbare Kachelerzeugung
 - `scripts/validate-project.mjs`: strukturelle Projektprüfung
+- `server/app.mjs`: HTTP-, Inhalts-, Authentifizierungs- und Upload-API
+- `server/database.mjs`: SQLite-Schema und Datenbankinitialisierung
+- `server/security.mjs`: Passwort-Hashing und sichere Zufallstoken
+- `server/manage-users.mjs`: lokale Benutzerverwaltung
+- `Dockerfile` und `compose.yaml`: optionales reproduzierbares Deployment
 
-Die Website verwendet Vanilla-HTML, -CSS und -JavaScript. Führe kein Framework,
-keinen Bundler und keinen Server ein, solange die Anforderung dies nicht
-zwingend benötigt. Relative Pfade sind erforderlich, damit die Website auch
-unter einer GitHub-Pages-Projektadresse funktioniert.
+Die Website verwendet Vanilla-HTML, -CSS und -JavaScript. Führe kein Frontend-
+Framework und keinen Bundler ein. Der optionale Server verwendet bewusst
+Node-Bordmittel, SQLite aus `node:sqlite`, `busboy` und `sharp`. Relative Pfade
+sind erforderlich, damit die Website auch unter einer GitHub-Pages-
+Projektadresse funktioniert.
 
 OpenSeadragon wird lokal ausgeliefert. Ersetze es nicht ohne Grund durch ein
 CDN. Eine Aktualisierung erfolgt kontrolliert über:
@@ -155,7 +169,7 @@ npm run copy-vendor
 - Prüfe erzeugte Karten visuell in mehreren Zoomstufen.
 - Behalte relative URLs und GitHub-Pages-Kompatibilität bei.
 
-Kacheln werden mit Node.js 20 oder neuer erzeugt:
+Kacheln werden mit Node.js 24.4 oder neuer erzeugt:
 
 ```bash
 npm install
@@ -249,6 +263,56 @@ Das aktuelle Schema sieht vereinfacht so aus:
   Bereitstellung.
 - Bilder dürfen nicht ohne ausdrücklichen Auftrag generativ verändert werden.
 
+Statische Fotos und Server-Uploads haben unterschiedliche Lebenszyklen:
+
+- Statische Fotos bleiben unter `images/objects/` und in `data/objects.json`.
+- Uploads liegen ausschließlich unter `BSSMAP_DATA_DIR/photos/` und ihre
+  Metadaten in SQLite.
+- Der Viewer führt beide Quellen zusammen. Ein Ausfall oder die Deaktivierung
+  des Servers darf statische Fotos nicht beeinträchtigen.
+- Uploads werden als WebP mit maximal 2.000 Pixeln und als Vorschaubild mit
+  maximal 500 Pixeln gespeichert. Übernimm keine EXIF- oder GPS-Metadaten.
+- Akzeptiere serverseitig höchstens 10 MB und nur tatsächlich lesbare JPEG-,
+  PNG- oder WebP-Dateien. Vertraue nicht allein auf Dateiname oder MIME-Header.
+
+### Serverbetrieb, Authentifizierung und Inhalte
+
+`runtime-config.json` muss im Repository stets diese GitHub-Pages-sichere
+Konfiguration enthalten:
+
+```json
+{
+  "serverFeatures": false,
+  "apiBaseUrl": ""
+}
+```
+
+Der Node-Server liefert für denselben Pfad dynamisch eine aktivierte
+Konfiguration aus. Erkenne den Betriebsmodus nicht anhand des Hostnamens und
+trage keine Serveradresse fest in `viewer.js` ein.
+
+- Verwende Node.js 24.4 oder neuer; SQLite kommt aus `node:sqlite`.
+- `data/objects.json` bleibt die kanonische statische Basis. Bearbeitete
+  Beschreibungen sind SQLite-Overrides und ersetzen die Datei nicht.
+- Schreibzugriffe benötigen eine gültige Cookie-Sitzung, Rolle `editor` oder
+  `admin` und ein passendes CSRF-Token.
+- Sitzungs-Cookies bleiben `HttpOnly`, `SameSite=Lax` und im produktiven
+  HTTPS-Betrieb `Secure`.
+- Passwörter werden ausschließlich gesalzen mit `scrypt` gespeichert. Lege
+  niemals Klartextpasswörter, Sitzungen oder Service-Schlüssel im Repository
+  ab.
+- Ein `editor` darf Inhalte bearbeiten, Fotos hochladen und eigene Uploads
+  löschen. Ein `admin` darf zusätzlich fremde Uploads löschen.
+- Validiere Objekt-IDs gegen den tatsächlichen Bestand in
+  `data/objects.json`.
+- Stelle weder `server/`, die Quelldatei der Karte noch beliebige Dateien aus
+  dem Repository über den HTTP-Server bereit. Die öffentliche Dateiliste ist
+  bewusst eingeschränkt.
+- `var/` beziehungsweise `BSSMAP_DATA_DIR` ist persistent, nicht versioniert
+  und als Einheit aus SQLite-Datenbank und Fotoordner zu sichern.
+- GitHub Pages muss bei jeder Änderung ohne Backend weiterhin beide Karten,
+  Marker, Suche, Objektlinks, Beschreibungen und statische Fotos anbieten.
+
 ### Oberfläche und Barrierefreiheit
 
 - Die UI-Sprache ist Deutsch.
@@ -267,11 +331,26 @@ Das aktuelle Schema sieht vereinfacht so aus:
 Die Seite muss über HTTP geöffnet werden. `file://` ist wegen nachgeladener
 JSON-, DZI- und Kacheldateien nicht zuverlässig.
 
-Beispiel:
+Servermodus mit Redaktion:
+
+```bash
+npm install
+npm run setup
+npm start
+```
+
+Der Ablauf ist unter Windows, macOS und Linux identisch. Für weitere lokale
+Benutzer stehen `npm run user:add`, `npm run user:list` und
+`npm run user:disable -- --username NAME` zur Verfügung.
+
+Statischen GitHub-Pages-Modus ohne Backend testen:
 
 ```bash
 python3 -m http.server 8080 --bind 0.0.0.0
 ```
+
+Unter Windows kann stattdessen `py -m http.server 8080 --bind 0.0.0.0`
+verwendet werden.
 
 Danach:
 
@@ -291,7 +370,11 @@ git diff --check
 `npm test` prüft derzeit:
 
 - JavaScript-Syntax von `viewer.js`
+- Passwort-Hashing und Server-API
+- Anmeldung, Rollen- und CSRF-Schutz
+- Beschreibungsänderung, Bildverarbeitung und Löschen
 - erforderliche Dateien und HTML-IDs
+- deaktivierte Serverfunktionen in der statischen `runtime-config.json`
 - Schema, eindeutige IDs und Standardansichten in `data/maps.json`
 - Schema und Werte in `data/objects.json`
 - kartenspezifische Positionen innerhalb der jeweiligen Bildabmessungen
@@ -311,6 +394,10 @@ Führe zusätzlich einen Browser-Smoke-Test über einen lokalen HTTP-Server durc
    wurde.
 8. Umschalter, gefilterte Objektliste, unbekannte Karten-IDs, Objektübernahme
    sowie Browser-Zurück und Browser-Vorwärts testen.
+9. Im statischen Modus prüfen, dass kein Redaktionsbutton erscheint und keine
+   Anfrage an `/api` erfolgt.
+10. Im Servermodus als `editor` anmelden, Beschreibung ändern, Foto hochladen,
+    Galerie prüfen, Foto löschen und abmelden.
 
 Prüfe mindestens eine typische Desktopgröße und eine schmale Mobilansicht.
 
@@ -319,6 +406,7 @@ Prüfe mindestens eine typische Desktopgröße und eine schmale Mobilansicht.
 - Bewahre vorhandene Nutzeränderungen und bearbeite keine sachfremden Dateien.
 - Committe keine temporären Renderings, Analyse-Overlays oder lokalen
   Serverdateien.
+- Committe niemals `var/`, SQLite-Dateien, Uploads, Passwörter oder Sitzungen.
 - Generierte Kartenkacheln werden dagegen benötigt und müssen zusammen mit der
   zugehörigen DZI-Datei committed werden.
 - Große Binäränderungen müssen erwartbar und durch eine neue Kartenquelle
@@ -343,4 +431,7 @@ Eine Änderung ist erst abgeschlossen, wenn:
 - `npm test` erfolgreich ist,
 - `git diff --check` keine Probleme meldet,
 - Dokumentation und Validator zum neuen Verhalten passen,
+- der statische Modus ohne Backend vollständig funktioniert,
+- bei Serveränderungen Authentifizierung, Rechte und Uploadgrenzen geprüft
+  wurden,
 - keine Koordinaten, Tiefen oder Inhalte ungeprüft erfunden wurden.

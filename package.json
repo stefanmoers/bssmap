@@ -2,15 +2,27 @@
   "name": "blausteinsee-openseadragon-demo",
   "version": "1.0.0",
   "private": true,
-  "description": "Statischer OpenSeadragon-Viewer fuer die Tauchplatzkarte Blausteinsee",
+  "description": "OpenSeadragon-Viewer und optionaler Redaktionsserver fuer die Tauchplatzkarte Blausteinsee",
   "type": "module",
+  "engines": {
+    "node": ">=24.4.0"
+  },
   "scripts": {
+    "start": "node server/cli.mjs",
+    "setup": "node server/manage-users.mjs setup",
+    "user:add": "node server/manage-users.mjs add",
+    "user:list": "node server/manage-users.mjs list",
+    "user:disable": "node server/manage-users.mjs disable",
     "generate-tiles": "node scripts/generate-tiles.mjs",
     "copy-vendor": "node scripts/copy-vendor.mjs",
-    "test": "node --check viewer.js && node scripts/validate-project.mjs"
+    "test": "node --check viewer.js && node --test server/test/*.test.mjs && node scripts/validate-project.mjs",
+    "test:server": "node --test server/test/*.test.mjs"
+  },
+  "dependencies": {
+    "busboy": "1.6.0",
+    "sharp": "0.35.3"
   },
   "devDependencies": {
-    "openseadragon": "6.1.0",
-    "sharp": "0.35.3"
+    "openseadragon": "6.1.0"
   }
 }

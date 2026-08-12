@@ -1,9 +1,15 @@
 # Tauchplatzkarte Blausteinsee
 
-Dieses Repository enthält einen vollständig statischen Deep-Zoom-Viewer für
-zwei interaktive Tauchplatzkarten des Blausteinsees. Große Karten werden als
-PNG-Kachelpyramiden geladen und bleiben dadurch auch auf Mobilgeräten flüssig
-zoombar.
+Dieses Repository enthält einen Deep-Zoom-Viewer für zwei interaktive
+Tauchplatzkarten des Blausteinsees. Große Karten werden als PNG-Kachelpyramiden
+geladen und bleiben dadurch auch auf Mobilgeräten flüssig zoombar.
+
+Das Projekt besitzt zwei Betriebsarten:
+
+- **Statischer Modus** für GitHub Pages: Karten, Marker, Suche, lokale Fotos und
+  Objektlinks funktionieren ohne Backend.
+- **Servermodus** für den privaten Betrieb: zusätzlich Anmeldung,
+  Beschreibungsbearbeitung und Foto-Upload für freigeschaltete Redakteure.
 
 Verfügbar sind:
 
@@ -16,9 +22,54 @@ Marker, Suche, Detailinformationen und Fotos werden automatisch auf die Ziele
 der aktiven Karte eingeschränkt. Der aktuelle Kartenausschnitt und die
 Zoomstufe bleiben beim Wechsel relativ zur jeweiligen Gesamtkarte erhalten.
 
-## Lokal starten
+## Servermodus lokal einrichten
 
-Die Seite muss über HTTP geöffnet werden. Unter macOS oder Linux:
+Benötigt wird Node.js 24.4 oder neuer. Nach dem Klonen sind unter Windows,
+macOS und Linux dieselben Befehle verwendbar:
+
+```bash
+git clone https://github.com/stefanmoers/bssmap.git
+cd bssmap
+npm install
+npm run setup
+npm start
+```
+
+`npm run setup` fragt Benutzername und Passwort für den ersten Admin ab. Danach
+ist die Anwendung unter `http://localhost:8080/` erreichbar. Über das Stift-
+Symbol in der Werkzeugleiste öffnet sich die Anmeldung.
+
+Die Datenbank und hochgeladenen Fotos liegen standardmäßig unter `var/` und
+werden nicht in Git eingecheckt. Für ein vollständiges Backup genügt daher eine
+Sicherung dieses Ordners.
+
+Weitere Benutzer verwalten:
+
+```bash
+npm run user:add
+npm run user:list
+npm run user:disable -- --username NAME
+```
+
+Ein `editor` darf Beschreibungen ändern, Fotos hochladen und eigene Uploads
+löschen. Ein `admin` darf zusätzlich Uploads anderer Benutzer löschen.
+
+Für einen Test im lokalen Netzwerk:
+
+```bash
+npm start -- --host 0.0.0.0
+```
+
+Computer und Mobilgerät müssen sich im selben privaten Netzwerk befinden. Die
+lokale IP-Adresse des Computers ermitteln und beispielsweise
+`http://192.168.178.35:8080/` öffnen. Eine Firewall-Freigabe sollte nur für das
+private Netzwerk erfolgen.
+
+## Statischen GitHub-Pages-Modus lokal testen
+
+Dieser Test startet bewusst kein Backend. Damit lässt sich prüfen, dass GitHub
+Pages weiterhin alle öffentlichen Kartenfunktionen anbietet. Unter macOS oder
+Linux:
 
 ```bash
 python3 -m http.server 8080 --bind 0.0.0.0
@@ -30,22 +81,42 @@ Unter Windows PowerShell:
 py -m http.server 8080 --bind 0.0.0.0
 ```
 
-Anschließend öffnen:
-
-```text
-http://localhost:8080/
-```
+Anschließend `http://localhost:8080/` öffnen. Das Stift-Symbol für die Redaktion
+ist in diesem Modus nicht sichtbar.
 
 Ein direkter Doppelklick auf `index.html` ist nicht zuverlässig, weil Browser
 das Nachladen lokaler JSON-, DZI- und Kacheldateien bei `file://` einschränken
 können.
 
-### Auf Handy oder Tablet testen
+Den Server anschließend mit `Strg+C` beenden.
 
-Computer und Mobilgerät müssen sich im selben privaten Netzwerk befinden. Die
-lokale IP-Adresse des Computers ermitteln und auf dem Mobilgerät beispielsweise
-`http://192.168.178.35:8080/` öffnen. Den Server anschließend mit `Strg+C`
-beenden.
+## Mit Docker betreiben
+
+Docker ist optional. Die Einrichtung ist auf Windows mit Docker Desktop,
+macOS und Linux identisch:
+
+```bash
+git clone https://github.com/stefanmoers/bssmap.git
+cd bssmap
+docker compose build
+docker compose run --rm bssmap npm run setup
+docker compose up -d
+```
+
+Die Anwendung ist danach unter `http://localhost:8080/` erreichbar. Datenbank
+und Uploads bleiben im Docker-Volume `bssmap-data` erhalten. Aktualisierung:
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+Im öffentlichen Serverbetrieb muss ein HTTPS-Reverse-Proxy vor der Anwendung
+stehen. Setze dann `BSSMAP_SECURE_COOKIES=true` und beispielsweise
+`BSSMAP_PUBLIC_ORIGIN=https://karte.example.org`. Die Anwendung selbst sollte
+nur an den Reverse-Proxy gebunden beziehungsweise per Firewall geschützt sein.
+Die Datei `.env.example` kann dafür als Vorlage für eine nicht versionierte
+`.env` verwendet werden.
 
 ## Bedienung
 
@@ -57,6 +128,7 @@ beenden.
 - `0`: Standardansicht der aktiven Karte öffnen
 - `F`: Vollbildansicht umschalten
 - `◎`: Tauchziele öffnen und durchsuchen
+- `✎`: Redaktion öffnen, sofern der Servermodus aktiv ist
 - gelbe Markierung: Informationen zum Tauchziel anzeigen
 
 Der Kartenumschalter und die Marker sind mit Maus, Touch und Tastatur bedienbar.
@@ -128,9 +200,20 @@ am kanonischen Objekt eingetragen:
 
 Weitere Hinweise stehen in `images/objects/README.md`.
 
+Im Servermodus können Redakteure Fotos direkt in der Detailansicht eines
+Tauchziels hochladen. Erlaubt sind JPEG, PNG und WebP bis 10 MB. Der Server
+erzeugt automatisch ein großes WebP mit maximal 2.000 Pixeln sowie ein
+Vorschaubild mit maximal 500 Pixeln. Metadaten wie EXIF- und GPS-Daten werden
+nicht übernommen. Statische und hochgeladene Fotos erscheinen gemeinsam in
+derselben Galerie.
+
+Bearbeitete Beschreibungen werden als Server-Override in SQLite gespeichert.
+Die unveränderte Beschreibung aus `data/objects.json` bleibt der Fallback für
+GitHub Pages.
+
 ## Kacheln reproduzierbar erzeugen
 
-Voraussetzung ist Node.js 20 oder neuer. Abhängigkeiten installieren:
+Voraussetzung ist Node.js 24.4 oder neuer. Abhängigkeiten installieren:
 
 ```bash
 npm install
@@ -172,7 +255,8 @@ git diff --check
 
 Der Validator prüft beide Kartendefinitionen, DZI-Abmessungen, vollständige
 Kachelpyramiden, kartenspezifische Objektpositionen, eindeutige IDs und alle
-Fotoreferenzen.
+Fotoreferenzen. `npm test` führt außerdem die Servertests für Anmeldung,
+Berechtigungen, Beschreibung, Upload, Bildverarbeitung und Löschen aus.
 
 ## Projektstruktur
 
@@ -180,6 +264,7 @@ Fotoreferenzen.
 index.html                         Viewer-Seite und Kartenumschalter
 styles.css                        Responsive Oberfläche und Marker
 viewer.js                         OpenSeadragon- und Mehrkartenlogik
+runtime-config.json               deaktiviert Serverfunktionen auf GitHub Pages
 data/maps.json                    Kartendefinitionen
 data/objects.json                 Objekte und kartenspezifische Positionen
 maps/object-map/map.dzi           DZI der Objektkarte
@@ -187,6 +272,9 @@ maps/object-map/map_files/        Kacheln der Objektkarte
 maps/detail-map/map.dzi           DZI der Detailkarte
 maps/detail-map/map_files/        Kacheln der Detailkarte
 images/objects/                   Unterwasserfotos
+server/                           HTTP-Server, SQLite, Auth und Upload
+var/                              lokale Laufzeitdaten, nicht versioniert
+Dockerfile / compose.yaml         optionales Serverdeployment
 vendor/openseadragon/             Lokale OpenSeadragon-Laufzeit
 scripts/                          Kachelerzeugung und Projektvalidator
 ```
@@ -194,7 +282,10 @@ scripts/                          Kachelerzeugung und Projektvalidator
 ## GitHub Pages und Rechte
 
 Alle Ressourcen verwenden relative Pfade und funktionieren unter einer
-GitHub-Pages-Projektadresse. Die Karten, Symbole, Texte und Fotos bleiben
-Eigentum ihrer jeweiligen Urheber; vor einer öffentlichen Veröffentlichung
-sind Freigaben und Bildrechte zu prüfen. OpenSeadragon wird unter der
-BSD-3-Clause-Lizenz ausgeliefert.
+GitHub-Pages-Projektadresse. Die eingecheckte `runtime-config.json` deaktiviert
+dort nur Anmeldung und Redaktionsfunktionen. Beide Karten, Marker, Suche,
+Objektlinks und statische Fotos bleiben vollständig nutzbar.
+
+Die Karten, Symbole, Texte und Fotos bleiben Eigentum ihrer jeweiligen Urheber;
+vor einer öffentlichen Veröffentlichung sind Freigaben und Bildrechte zu
+prüfen. OpenSeadragon wird unter der BSD-3-Clause-Lizenz ausgeliefert.

@@ -15,6 +15,13 @@
   const objectList = byId("object-list");
   const objectCount = byId("object-count");
   const markerVisibility = byId("marker-visibility");
+  const serverAccess = byId("server-access");
+  const serverDialog = byId("server-dialog");
+  const loginForm = byId("login-form");
+  const sessionView = byId("session-view");
+  const descriptionForm = byId("description-form");
+  const photoUploadForm = byId("photo-upload-form");
+  const objectEditorActions = byId("object-editor-actions");
   const coordinateEditor = byId("coordinate-editor");
   const coordinateOutput = byId("coordinate-output");
   const coordinateCopy = byId("coordinate-copy");
@@ -27,6 +34,7 @@
   let mapById = new Map();
   let defaultMapId = "object-map";
   let currentMap = null;
+  let staticObjects = [];
   let allObjects = [];
   let objects = [];
   let objectById = new Map();
@@ -43,6 +51,9 @@
   let editorEnabled = false;
   let editorPoint = null;
   let editorMarker = null;
+  let runtimeConfig = { serverFeatures: false, apiBaseUrl: "" };
+  let serverContent = { objects: {} };
+  let session = null;
 
   if (!window.OpenSeadragon) {
     status.textContent = "OpenSeadragon konnte nicht geladen werden.";
@@ -282,6 +293,7 @@
     image.src = photo.src;
     image.alt = photo.alt || selectedObject.name;
     byId("photo-caption").textContent = photo.caption || "";
+    byId("photo-delete").hidden = !(session?.authenticated && photo.managed && photo.canDelete);
 
     byId("photo-thumbnails").querySelectorAll("button").forEach((button, buttonIndex) => {
       button.classList.toggle("is-active", buttonIndex === index);
@@ -312,7 +324,7 @@
       button.type = "button";
       button.setAttribute("aria-label", `Foto ${index + 1} von ${object.name} anzeigen`);
       const image = document.createElement("img");
-      image.src = photo.src;
+      image.src = photo.thumbnailSrc || photo.src;
       image.alt = "";
       button.append(image);
       button.addEventListener("click", () => renderPhoto(photo, index));
@@ -328,6 +340,9 @@
     byId("object-category").textContent = object.category;
     byId("object-description").textContent = object.description || "Für dieses Tauchziel liegt noch keine Beschreibung vor.";
     renderPhotos(object);
+    descriptionForm.hidden = true;
+    photoUploadForm.hidden = true;
+    objectEditorActions.hidden = !session?.authenticated;
     objectBrowser.hidden = true;
     objectDetail.hidden = false;
   };
@@ -468,6 +483,97 @@
       throw new Error(`${label} konnten nicht geladen werden: HTTP ${response.status}`);
     }
     return response.json();
+  };
+
+  const apiUrl = (path) => `${runtimeConfig.apiBaseUrl.replace(/\/$/, "")}${path}`;
+
+  const apiRequest = async (path, options = {}) => {
+    const headers = new Headers(options.headers || {});
+    const method = String(options.method || "GET").toUpperCase();
+    if (!["GET", "HEAD"].includes(method) && session?.csrfToken) {
+      headers.set("X-CSRF-Token", session.csrfToken);
+    }
+    const response = await fetch(apiUrl(path), {
+      ...options,
+      method,
+      headers,
+      credentials: "same-origin"
+    });
+    const contentType = response.headers.get("content-type") || "";
+    const body = contentType.includes("application/json") ? await response.json() : null;
+    if (!response.ok) {
+      const error = new Error(body?.error || `Serveranfrage fehlgeschlagen: HTTP ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    return body;
+  };
+
+  const mergeServerContent = () => {
+    const overrides = serverContent?.objects || {};
+    const selectedId = selectedObject?.id || null;
+    allObjects = staticObjects.map((object) => {
+      const override = overrides[object.id] || {};
+      return {
+        ...object,
+        description: Object.hasOwn(override, "description") ? override.description : object.description,
+        photos: [
+          ...(Array.isArray(object.photos) ? object.photos : []),
+          ...(Array.isArray(override.photos) ? override.photos : [])
+        ]
+      };
+    });
+    objectById = new Map(allObjects.map((object) => [object.id, object]));
+    if (currentMap) {
+      setCurrentObjects();
+    }
+    if (selectedId) {
+      selectedObject = objectById.get(selectedId) || null;
+      if (selectedObject) {
+        renderObjectDetail(selectedObject);
+      }
+    }
+  };
+
+  const updateServerUi = () => {
+    serverAccess.hidden = !runtimeConfig.serverFeatures;
+    serverAccess.classList.toggle("is-authenticated", Boolean(session?.authenticated));
+    serverAccess.title = session?.authenticated
+      ? `Redaktion: ${session.username}`
+      : "Redaktion öffnen";
+    serverAccess.setAttribute("aria-label", serverAccess.title);
+
+    loginForm.hidden = Boolean(session?.authenticated);
+    sessionView.hidden = !session?.authenticated;
+    byId("session-username").textContent = session?.username || "";
+    byId("session-role").textContent = session?.role === "admin" ? "Rolle: Admin" : "Rolle: Redakteur";
+    objectEditorActions.hidden = !(session?.authenticated && selectedObject);
+    if (!session?.authenticated) {
+      descriptionForm.hidden = true;
+      photoUploadForm.hidden = true;
+      byId("photo-delete").hidden = true;
+    }
+  };
+
+  const refreshServerContent = async () => {
+    serverContent = await apiRequest("/content");
+    mergeServerContent();
+  };
+
+  const loadRuntimeConfig = async () => {
+    try {
+      const response = await fetch("runtime-config.json", { cache: "no-store" });
+      if (!response.ok) {
+        return { serverFeatures: false, apiBaseUrl: "" };
+      }
+      const config = await response.json();
+      return config?.serverFeatures && typeof config.apiBaseUrl === "string"
+        ? { serverFeatures: true, apiBaseUrl: config.apiBaseUrl }
+        : { serverFeatures: false, apiBaseUrl: "" };
+    } catch (error) {
+      console.warn("Laufzeitkonfiguration konnte nicht geladen werden", error);
+      return { serverFeatures: false, apiBaseUrl: "" };
+    }
   };
 
   const setCurrentObjects = () => {
@@ -708,6 +814,185 @@
     nextButton.click();
   });
 
+  serverAccess.addEventListener("click", () => {
+    updateServerUi();
+    byId("login-error").hidden = true;
+    serverDialog.showModal();
+    window.setTimeout(() => {
+      if (session?.authenticated) {
+        byId("logout").focus();
+      } else {
+        byId("login-username").focus();
+      }
+    }, 0);
+  });
+  byId("server-dialog-close").addEventListener("click", () => serverDialog.close());
+  serverDialog.addEventListener("click", (event) => {
+    if (event.target === serverDialog) {
+      serverDialog.close();
+    }
+  });
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submitButton = loginForm.querySelector("button[type='submit']");
+    const errorOutput = byId("login-error");
+    submitButton.disabled = true;
+    errorOutput.hidden = true;
+    try {
+      session = await apiRequest("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: byId("login-username").value.trim(),
+          password: byId("login-password").value
+        })
+      });
+      byId("login-password").value = "";
+      await refreshServerContent();
+      updateServerUi();
+      showStatus(`Als ${session.username} angemeldet`, 2200);
+    } catch (error) {
+      errorOutput.textContent = error.message;
+      errorOutput.hidden = false;
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+  byId("logout").addEventListener("click", async () => {
+    try {
+      await apiRequest("/logout", { method: "POST" });
+      session = null;
+      await refreshServerContent();
+      updateServerUi();
+      serverDialog.close();
+      showStatus("Abgemeldet", 1800);
+    } catch (error) {
+      if (error.status === 401) {
+        session = null;
+        try {
+          await refreshServerContent();
+        } catch (contentError) {
+          console.warn("Serverinhalte konnten nach Sitzungsende nicht aktualisiert werden", contentError);
+        }
+        updateServerUi();
+        serverDialog.close();
+      }
+      showStatus(error.message, 3000);
+    }
+  });
+
+  byId("description-edit").addEventListener("click", () => {
+    if (!selectedObject || !session?.authenticated) {
+      return;
+    }
+    byId("description-input").value = selectedObject.description || "";
+    descriptionForm.hidden = false;
+    photoUploadForm.hidden = true;
+    objectEditorActions.hidden = true;
+    byId("description-input").focus();
+  });
+  byId("description-cancel").addEventListener("click", () => {
+    descriptionForm.hidden = true;
+    objectEditorActions.hidden = !session?.authenticated;
+  });
+  descriptionForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!selectedObject || !session?.authenticated) {
+      return;
+    }
+    const objectId = selectedObject.id;
+    const submitButton = descriptionForm.querySelector("button[type='submit']");
+    submitButton.disabled = true;
+    try {
+      await apiRequest(`/objects/${encodeURIComponent(objectId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: byId("description-input").value })
+      });
+      await refreshServerContent();
+      showStatus("Beschreibung gespeichert", 2000);
+    } catch (error) {
+      if (error.status === 401) {
+        session = null;
+        updateServerUi();
+      }
+      showStatus(error.message, 3200);
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+  byId("photo-upload-open").addEventListener("click", () => {
+    if (!selectedObject || !session?.authenticated) {
+      return;
+    }
+    photoUploadForm.reset();
+    photoUploadForm.hidden = false;
+    descriptionForm.hidden = true;
+    objectEditorActions.hidden = true;
+    byId("photo-file").focus();
+  });
+  byId("photo-upload-cancel").addEventListener("click", () => {
+    photoUploadForm.hidden = true;
+    objectEditorActions.hidden = !session?.authenticated;
+  });
+  photoUploadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!selectedObject || !session?.authenticated) {
+      return;
+    }
+    const file = byId("photo-file").files[0];
+    if (!file) {
+      showStatus("Bitte zuerst ein Foto auswählen.", 2600);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showStatus("Das Foto darf höchstens 10 MB groß sein.", 3200);
+      return;
+    }
+    const objectId = selectedObject.id;
+    const submitButton = photoUploadForm.querySelector("button[type='submit']");
+    submitButton.disabled = true;
+    try {
+      await apiRequest(`/objects/${encodeURIComponent(objectId)}/photos`, {
+        method: "POST",
+        body: new FormData(photoUploadForm)
+      });
+      await refreshServerContent();
+      showStatus("Foto hochgeladen", 2200);
+    } catch (error) {
+      if (error.status === 401) {
+        session = null;
+        updateServerUi();
+      }
+      showStatus(error.message, 3400);
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+
+  byId("photo-delete").addEventListener("click", async () => {
+    if (!selectedPhoto?.managed || !selectedPhoto.canDelete || !session?.authenticated) {
+      return;
+    }
+    if (!window.confirm("Dieses hochgeladene Foto wirklich löschen?")) {
+      return;
+    }
+    try {
+      await apiRequest(`/photos/${encodeURIComponent(selectedPhoto.id)}`, { method: "DELETE" });
+      await refreshServerContent();
+      showStatus("Foto gelöscht", 2000);
+    } catch (error) {
+      if (error.status === 401) {
+        session = null;
+        updateServerUi();
+      }
+      showStatus(error.message, 3200);
+    }
+  });
+
   byId("object-link-copy").addEventListener("click", async () => {
     if (!selectedObject || !currentMap) {
       return;
@@ -808,10 +1093,9 @@
       return;
     }
 
-    // Das Dialog-Element verarbeitet Escape selbst. Die Objektansicht soll
-    // dabei geöffnet bleiben, damit man nach dem Foto zur Beschreibung
-    // zurückkehrt.
-    if (event.key === "Escape" && photoDialog.open) {
+    // Dialog-Elemente verarbeiten ihre Tastaturereignisse selbst. Die
+    // Objektansicht bleibt dabei geöffnet.
+    if (photoDialog.open || serverDialog.open) {
       return;
     }
 
@@ -833,9 +1117,10 @@
 
   const initialize = async () => {
     try {
-      const [mapData, objectData] = await Promise.all([
+      const [mapData, objectData, loadedRuntimeConfig] = await Promise.all([
         loadJson("data/maps.json", "Kartendaten"),
-        loadJson("data/objects.json", "Objektdaten")
+        loadJson("data/objects.json", "Objektdaten"),
+        loadRuntimeConfig()
       ]);
       if (!mapData || !Array.isArray(mapData.maps) || !mapData.defaultMapId) {
         throw new Error("Kartendaten haben ein ungültiges Format.");
@@ -847,14 +1132,32 @@
       maps = mapData.maps;
       mapById = new Map(maps.map((map) => [map.id, map]));
       defaultMapId = mapById.has(mapData.defaultMapId) ? mapData.defaultMapId : "object-map";
-      allObjects = objectData.objects;
-      objectById = new Map(allObjects.map((object) => [object.id, object]));
+      staticObjects = objectData.objects;
+      allObjects = staticObjects;
+      runtimeConfig = loadedRuntimeConfig;
+      let serverStatus = "";
+
+      if (runtimeConfig.serverFeatures) {
+        try {
+          [session, serverContent] = await Promise.all([
+            apiRequest("/session"),
+            apiRequest("/content")
+          ]);
+        } catch (error) {
+          console.warn("Serverfunktionen sind vorübergehend nicht erreichbar", error);
+          session = null;
+          serverContent = { objects: {} };
+          serverStatus = "Die Redaktion ist vorübergehend nicht erreichbar. Die Karte funktioniert weiterhin.";
+        }
+      }
+      mergeServerContent();
+      updateServerUi();
 
       const params = new URLSearchParams(window.location.search);
       const requestedMapId = params.get("map") || defaultMapId;
       const initialMapId = mapById.has(requestedMapId) ? requestedMapId : defaultMapId;
       const requestedObjectId = params.get("object");
-      let initialStatus = "";
+      let initialStatus = serverStatus;
 
       if (requestedMapId !== initialMapId) {
         initialStatus = `Unbekannte Kartenansicht „${requestedMapId}“. Die Objektkarte wurde geöffnet.`;
