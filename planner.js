@@ -15,6 +15,7 @@
   const openButton = byId("planner-open");
   const warningDialog = byId("planner-warning-dialog");
   const objectPanel = byId("object-panel");
+  const mobilePlannerMedia = window.matchMedia("(pointer: coarse), (max-width: 760px)");
   const STORAGE_KEY = "bssmap.dive-plan.v1";
   const WARNING_ACKNOWLEDGEMENT_KEY = "bssmap.dive-plan-warning.v1";
   const MAX_WAYPOINTS = 30;
@@ -38,6 +39,7 @@
   let currentPlan = null;
   let planningActive = false;
   let panelOpen = false;
+  let mobileCollapsed = false;
   let warningAcknowledgedInMemory = false;
   let routeRenderFrame = null;
 
@@ -345,6 +347,19 @@
       "is-danger",
       Number.isFinite(totals.endPressureBar) && totals.endPressureBar < settings.reservePressureBar
     );
+
+    const mobileSummaryParts = [
+      waypoints.length === 0
+        ? "Noch keine Wegpunkte"
+        : `${waypoints.length} ${waypoints.length === 1 ? "Wegpunkt" : "Wegpunkte"}`
+    ];
+    if (completeRouteSelected && Number.isFinite(totals.distanceMeters)) {
+      mobileSummaryParts.push(formatMeters(totals.distanceMeters));
+    }
+    if (Number.isFinite(totals.totalMinutes)) {
+      mobileSummaryParts.push(formatMinutes(totals.totalMinutes));
+    }
+    byId("planner-mobile-summary").textContent = mobileSummaryParts.join(" · ");
   };
 
   const renderProfile = () => {
@@ -477,7 +492,23 @@
     render();
   };
 
+  const synchronizeMobilePanel = () => {
+    const collapsed = panelOpen && mobilePlannerMedia.matches && mobileCollapsed;
+    panel.classList.toggle("is-mobile-collapsed", collapsed);
+    mapShell.classList.toggle("planner-mobile-collapsed", collapsed);
+    const toggle = byId("planner-mobile-toggle");
+    toggle.textContent = collapsed ? "Details" : "Auf Karte weiterplanen";
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+  };
+
+  const setMobileCollapsed = (collapsed) => {
+    mobileCollapsed = mobilePlannerMedia.matches && collapsed;
+    synchronizeMobilePanel();
+    scheduleRouteRender();
+  };
+
   const setPanelOpen = (open, { keepPlanningActive = false } = {}) => {
+    const wasOpen = panelOpen;
     panelOpen = open;
     if (open) {
       planningActive = true;
@@ -492,13 +523,24 @@
     mapShell.classList.toggle("planner-active", planningActive);
     mapShell.classList.toggle("planner-panel-open", open);
     mapShell.classList.toggle("panel-open", open || objectPanel.classList.contains("is-open"));
+    if (open && !wasOpen) {
+      mobileCollapsed = mobilePlannerMedia.matches;
+    } else if (!open) {
+      mobileCollapsed = false;
+    }
+    synchronizeMobilePanel();
     routeOverlay.style.display = open ? "" : "none";
     viewerApi.setPlannerRouteMarkers(
       open ? waypoints.map((waypoint) => waypoint.objectId) : []
     );
     scheduleRouteRender();
     if (open) {
-      window.setTimeout(() => byId("planner-close").focus(), 220);
+      window.setTimeout(() => {
+        const focusTarget = mobilePlannerMedia.matches
+          ? byId("planner-mobile-toggle")
+          : byId("planner-close");
+        focusTarget.focus();
+      }, 220);
     }
   };
 
@@ -589,6 +631,13 @@
     setPanelOpen(false);
     openButton.focus();
   });
+  byId("planner-mobile-close").addEventListener("click", () => {
+    setPanelOpen(false);
+    openButton.focus();
+  });
+  byId("planner-mobile-toggle").addEventListener("click", () => {
+    setMobileCollapsed(!mobileCollapsed);
+  });
   byId("planner-choose-object").addEventListener("click", () => {
     setPanelOpen(false, { keepPlanningActive: true });
     viewerApi.openObjectBrowser();
@@ -614,6 +663,7 @@
     if (event.detail.source === "list") {
       viewerApi.closeObjectPanel();
       setPanelOpen(true);
+      setMobileCollapsed(true);
     }
   });
 
@@ -658,6 +708,17 @@
     render();
   });
   window.addEventListener("bssmap:viewport-change", scheduleRouteRender);
+
+  const handleMobilePlannerMediaChange = (event) => {
+    mobileCollapsed = panelOpen && event.matches;
+    synchronizeMobilePanel();
+    scheduleRouteRender();
+  };
+  if (typeof mobilePlannerMedia.addEventListener === "function") {
+    mobilePlannerMedia.addEventListener("change", handleMobilePlannerMediaChange);
+  } else {
+    mobilePlannerMedia.addListener(handleMobilePlannerMediaChange);
+  }
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && panelOpen) {

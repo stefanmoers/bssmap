@@ -228,6 +228,10 @@ h1 {
   width: min(450px, calc(100vw - 28px));
 }
 
+.planner-mobile-bar {
+  display: none;
+}
+
 .panel-header,
 .coordinate-editor header {
   display: flex;
@@ -1502,7 +1506,8 @@ h1 {
     right: max(8px, env(safe-area-inset-right));
     bottom: max(8px, env(safe-area-inset-bottom));
     width: auto;
-    max-height: min(68vh, 610px);
+    max-height: min(58vh, 610px);
+    max-height: min(58dvh, 610px);
     border-radius: 17px;
     transform: translateY(calc(100% + 20px));
   }
@@ -1510,6 +1515,82 @@ h1 {
   .object-panel.is-open,
   .planner-panel.is-open {
     transform: translateY(0);
+  }
+
+  .planner-panel > .panel-header {
+    display: none;
+  }
+
+  .planner-mobile-bar {
+    display: flex;
+    min-height: 78px;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 11px 10px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(7, 21, 34, 0.72);
+  }
+
+  .planner-mobile-status {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 3px;
+  }
+
+  .planner-mobile-status > span {
+    color: #8ed9ff;
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .planner-mobile-status > strong {
+    overflow: hidden;
+    color: #f6fbff;
+    font-size: 0.82rem;
+    font-weight: 650;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .planner-mobile-toggle {
+    min-height: 40px;
+    flex: 0 0 auto;
+    padding: 8px 11px;
+    border: 1px solid rgba(142, 217, 255, 0.52);
+    border-radius: 9px;
+    background: rgba(142, 217, 255, 0.12);
+    color: #d9f4ff;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .planner-mobile-toggle:hover,
+  .planner-mobile-toggle:focus-visible {
+    border-color: #8ed9ff;
+    background: rgba(142, 217, 255, 0.22);
+    outline: 3px solid rgba(142, 217, 255, 0.2);
+    outline-offset: 2px;
+  }
+
+  .planner-mobile-bar .icon-button {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+  }
+
+  .planner-panel.is-mobile-collapsed {
+    max-height: none;
+  }
+
+  .planner-panel.is-mobile-collapsed .planner-content {
+    display: none;
   }
 
   .map-shell.panel-open .navigator {
@@ -1520,6 +1601,11 @@ h1 {
   .planner-content {
     padding-right: 13px;
     padding-left: 13px;
+  }
+
+  .map-shell.planner-mobile-collapsed .status,
+  .map-shell.planner-mobile-collapsed .usage-hint {
+    bottom: max(98px, calc(env(safe-area-inset-bottom) + 98px));
   }
 
   .map-marker {
@@ -1559,6 +1645,20 @@ h1 {
 
   .planner-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .planner-mobile-bar {
+    gap: 7px;
+    padding-left: 11px;
+  }
+
+  .planner-mobile-status > strong {
+    font-size: 0.76rem;
+  }
+
+  .planner-mobile-toggle {
+    padding-right: 9px;
+    padding-left: 9px;
   }
 
   .planner-warning-dialog form {

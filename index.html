@@ -112,6 +112,15 @@
     </aside>
 
     <aside id="planner-panel" class="planner-panel" aria-hidden="true" aria-label="Tauchgangsplaner">
+      <div id="planner-mobile-bar" class="planner-mobile-bar">
+        <div class="planner-mobile-status">
+          <span>Planung aktiv</span>
+          <strong id="planner-mobile-summary" aria-live="polite">Noch keine Wegpunkte</strong>
+        </div>
+        <button id="planner-mobile-toggle" class="planner-mobile-toggle" type="button" aria-expanded="false" aria-controls="planner-content">Details</button>
+        <button id="planner-mobile-close" class="icon-button" type="button" aria-label="Tauchgangsplaner schließen">×</button>
+      </div>
+
       <header class="panel-header">
         <div>
           <span class="eyebrow">Route, Zeit und Gas</span>
@@ -120,7 +129,7 @@
         <button id="planner-close" class="icon-button" type="button" aria-label="Tauchgangsplaner schließen">×</button>
       </header>
 
-      <div class="planner-content">
+      <div id="planner-content" class="planner-content">
         <p class="planner-intro">Klicke Tauchziele auf der Karte oder in der Objektliste in der gewünschten Reihenfolge an.</p>
 
         <section class="planner-section" aria-labelledby="planner-route-heading">
