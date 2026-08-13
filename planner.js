@@ -322,6 +322,7 @@
     byId("planner-reverse").disabled = waypoints.length < 2;
     byId("planner-clear").disabled = waypoints.length === 0;
     byId("planner-copy-link").disabled = waypoints.length < 2;
+    byId("planner-mobile-undo").disabled = waypoints.length === 0;
   };
 
   const setSummary = (id, value) => {
@@ -607,6 +608,19 @@
     viewerApi.showStatus(`${object.name} als Wegpunkt ${waypoints.length} hinzugefügt`, 2000);
   };
 
+  const removeLastWaypoint = () => {
+    const removedWaypoint = waypoints.pop();
+    if (!removedWaypoint) {
+      return;
+    }
+    const removedObject = viewerApi.getObject(removedWaypoint.objectId);
+    updatePlanState();
+    viewerApi.showStatus(
+      `${removedObject?.name || removedWaypoint.objectId} aus der Route entfernt`,
+      2000
+    );
+  };
+
   loadStoredState();
   let openRouteOnNextMap = loadRouteFromUrl();
   applySettingsToForm();
@@ -638,6 +652,7 @@
   byId("planner-mobile-toggle").addEventListener("click", () => {
     setMobileCollapsed(!mobileCollapsed);
   });
+  byId("planner-mobile-undo").addEventListener("click", removeLastWaypoint);
   byId("planner-choose-object").addEventListener("click", () => {
     setPanelOpen(false, { keepPlanningActive: true });
     viewerApi.openObjectBrowser();

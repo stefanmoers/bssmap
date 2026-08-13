@@ -48,6 +48,7 @@ const requiredIds = [
   "object-detail",
   "planner-panel",
   "planner-mobile-summary",
+  "planner-mobile-undo",
   "planner-mobile-toggle",
   "planner-mobile-close",
   "planner-warning-dialog",

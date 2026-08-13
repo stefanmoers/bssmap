@@ -1571,6 +1571,35 @@ h1 {
     cursor: pointer;
   }
 
+  .planner-mobile-undo {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    padding: 0;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f6fbff;
+    font: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+
+  .planner-mobile-undo:hover,
+  .planner-mobile-undo:focus-visible {
+    border-color: #8ed9ff;
+    background: rgba(142, 217, 255, 0.18);
+    outline: 3px solid rgba(142, 217, 255, 0.2);
+    outline-offset: 2px;
+  }
+
+  .planner-mobile-undo:disabled {
+    cursor: not-allowed;
+    opacity: 0.35;
+  }
+
   .planner-mobile-toggle:hover,
   .planner-mobile-toggle:focus-visible {
     border-color: #8ed9ff;
