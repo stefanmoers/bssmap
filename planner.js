@@ -62,6 +62,7 @@
   const routeGroup = document.createElementNS(SVG_NAMESPACE, "g");
   routeOverlay.append(routeGroup);
   viewerElement.append(routeOverlay);
+  routeOverlay.style.display = "none";
 
   const nextKey = () => `waypoint-${Date.now()}-${keySequence += 1}`;
 
@@ -420,10 +421,13 @@
 
   const renderRouteOverlay = () => {
     routeRenderFrame = null;
+    routeGroup.replaceChildren();
+    if (!panelOpen) {
+      return;
+    }
     const width = viewerElement.clientWidth;
     const height = viewerElement.clientHeight;
     routeOverlay.setAttribute("viewBox", `0 0 ${width} ${height}`);
-    routeGroup.replaceChildren();
     const pixels = routePixels();
     for (let index = 1; index < pixels.length; index += 1) {
       const from = pixels[index - 1];
@@ -456,7 +460,9 @@
       metersPerPixel: currentMap?.metersPerPixel,
       settings
     });
-    viewerApi.setPlannerRouteMarkers(waypoints.map((waypoint) => waypoint.objectId));
+    viewerApi.setPlannerRouteMarkers(
+      panelOpen ? waypoints.map((waypoint) => waypoint.objectId) : []
+    );
     renderWaypoints();
     renderSummary();
     renderProfile();
@@ -486,6 +492,11 @@
     mapShell.classList.toggle("planner-active", planningActive);
     mapShell.classList.toggle("planner-panel-open", open);
     mapShell.classList.toggle("panel-open", open || objectPanel.classList.contains("is-open"));
+    routeOverlay.style.display = open ? "" : "none";
+    viewerApi.setPlannerRouteMarkers(
+      open ? waypoints.map((waypoint) => waypoint.objectId) : []
+    );
+    scheduleRouteRender();
     if (open) {
       window.setTimeout(() => byId("planner-close").focus(), 220);
     }
