@@ -13,8 +13,10 @@
   const viewerElement = byId("viewer");
   const panel = byId("planner-panel");
   const openButton = byId("planner-open");
+  const warningDialog = byId("planner-warning-dialog");
   const objectPanel = byId("object-panel");
   const STORAGE_KEY = "bssmap.dive-plan.v1";
+  const WARNING_ACKNOWLEDGEMENT_KEY = "bssmap.dive-plan-warning.v1";
   const MAX_WAYPOINTS = 30;
   const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const numberFormatter = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
@@ -36,6 +38,7 @@
   let currentPlan = null;
   let planningActive = false;
   let panelOpen = false;
+  let warningAcknowledgedInMemory = false;
   let routeRenderFrame = null;
 
   const routeOverlay = document.createElementNS(SVG_NAMESPACE, "svg");
@@ -488,6 +491,54 @@
     }
   };
 
+  const warningAcknowledged = () => {
+    if (warningAcknowledgedInMemory) {
+      return true;
+    }
+    try {
+      return window.sessionStorage.getItem(WARNING_ACKNOWLEDGEMENT_KEY) === "accepted";
+    } catch (error) {
+      console.warn("Die Bestätigung des Planer-Hinweises konnte nicht gelesen werden.", error);
+      return false;
+    }
+  };
+
+  const rememberWarningAcknowledgement = () => {
+    warningAcknowledgedInMemory = true;
+    try {
+      window.sessionStorage.setItem(WARNING_ACKNOWLEDGEMENT_KEY, "accepted");
+    } catch (error) {
+      console.warn("Die Bestätigung des Planer-Hinweises konnte nicht gespeichert werden.", error);
+    }
+  };
+
+  const openPlanner = () => {
+    if (warningAcknowledged()) {
+      setPanelOpen(true);
+      render();
+      return;
+    }
+
+    if (typeof warningDialog.showModal === "function") {
+      warningDialog.returnValue = "";
+      warningDialog.showModal();
+      return;
+    }
+
+    const accepted = window.confirm(
+      "Experimentelle Planungshilfe: Entfernungen, Tiefen, Zeiten und Gaswerte sind nur Schätzwerte. "
+      + "Der Planer berechnet keine Nullzeit oder Dekompression und ersetzt keine eigenständige Tauchgangs- und Gasplanung. "
+      + "Verlasse dich unter Wasser niemals darauf. Trotzdem öffnen?"
+    );
+    if (accepted) {
+      rememberWarningAcknowledgement();
+      setPanelOpen(true);
+      render();
+    } else {
+      openButton.focus();
+    }
+  };
+
   const addWaypoint = (objectId) => {
     const object = viewerApi.getObject(objectId);
     if (!object) {
@@ -508,10 +559,20 @@
   applySettingsToForm();
 
   openButton.addEventListener("click", () => {
-    setPanelOpen(!panelOpen);
     if (panelOpen) {
-      render();
+      setPanelOpen(false);
+      return;
     }
+    openPlanner();
+  });
+  warningDialog.addEventListener("close", () => {
+    if (warningDialog.returnValue === "accept") {
+      rememberWarningAcknowledgement();
+      setPanelOpen(true);
+      render();
+      return;
+    }
+    openButton.focus();
   });
   byId("planner-close").addEventListener("click", () => {
     setPanelOpen(false);
@@ -579,7 +640,7 @@
       viewerApi.showStatus("Unbekannte Wegpunkte aus der gespeicherten Route wurden entfernt.", 3200);
     }
     if (openRouteOnNextMap && waypoints.length >= 2) {
-      setPanelOpen(true);
+      openPlanner();
     }
     openRouteOnNextMap = false;
     persistState();

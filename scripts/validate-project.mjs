@@ -47,6 +47,8 @@ const requiredIds = [
   "object-list",
   "object-detail",
   "planner-panel",
+  "planner-warning-dialog",
+  "planner-warning-accept",
   "planner-waypoints",
   "planner-settings",
   "planner-issues",

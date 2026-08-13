@@ -204,7 +204,7 @@
           <ul id="planner-issues" class="planner-issues" aria-live="polite"></ul>
         </section>
 
-        <p class="planner-disclaimer"><strong>Planungshilfe:</strong> Entfernungen, Tiefen, Zeiten und Drücke sind Schätzwerte. Der Planer berechnet keine Nullzeit oder Dekompression und ersetzt weder Ausbildung noch Tauchcomputer, Tabelle oder persönliche Gasreserveplanung.</p>
+        <p class="planner-disclaimer"><strong>Experimentelle Planungshilfe:</strong> Entfernungen, Tiefen, Zeiten und Drücke sind Schätzwerte. Verlasse dich unter Wasser niemals darauf. Der Planer berechnet keine Nullzeit oder Dekompression und ersetzt weder Ausbildung noch Tauchcomputer, Tabelle oder persönliche Gasreserveplanung.</p>
       </div>
     </aside>
 
@@ -237,6 +237,23 @@
       <p class="error-card">Für die interaktive Karte muss JavaScript aktiviert sein.</p>
     </noscript>
   </main>
+
+  <dialog id="planner-warning-dialog" class="planner-warning-dialog" aria-labelledby="planner-warning-title" aria-describedby="planner-warning-description">
+    <form method="dialog">
+      <div class="planner-warning-icon" aria-hidden="true">⚠</div>
+      <span class="eyebrow">Experimentelle Planungshilfe</span>
+      <h2 id="planner-warning-title">Kurz nachdenken, dann abtauchen</h2>
+      <div id="planner-warning-description" class="planner-warning-copy">
+        <p><strong>Dieser Planer trägt noch Schwimmflügel.</strong> Entfernungen, Tiefen, Zeiten, Gasverbrauch und Restdruck sind nur grobe Schätzwerte und können unvollständig oder falsch sein.</p>
+        <p>Er berechnet weder Nullzeit noch Dekompression und kennt auch Strömung, Sicht, Kälte, Anstrengung, Tagesform oder deinen Buddy nicht. Plane jeden Tauchgang eigenständig nach deiner Ausbildung, den tatsächlichen Bedingungen, einer geprüften Gasplanung sowie mit Tauchcomputer oder Tabelle und ausreichender Reserve.</p>
+        <p><strong>Verlasse dich unter Wasser niemals auf diese Berechnung.</strong> Die Nutzung erfolgt auf eigene Verantwortung. Betreiber und Autoren übernehmen keine Gewähr für Richtigkeit, Vollständigkeit oder Eignung der Angaben; die gesetzliche Haftung bleibt unberührt.</p>
+      </div>
+      <div class="planner-warning-actions">
+        <button class="secondary-button" type="submit" value="cancel" autofocus>Lieber zurück zur Karte</button>
+        <button id="planner-warning-accept" class="warning-accept-button" type="submit" value="accept">Verstanden – Planer öffnen</button>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="photo-dialog" class="photo-dialog">
     <button id="photo-dialog-close" class="icon-button" type="button" aria-label="Foto schließen">×</button>

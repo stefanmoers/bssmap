@@ -268,6 +268,10 @@ Node-Server abhängen. Seine Route besteht aus stabilen Objekt-IDs; dasselbe
 Objekt kann mehrfach vorkommen. Einstellungen und Aufenthaltszeiten werden
 unter `bssmap.dive-plan.v1` in `localStorage` gespeichert. Ein Routenlink
 enthält nur Karten-ID und geordnete Objekt-IDs, keine persönlichen Gaswerte.
+Beim ersten Öffnen pro Browser-Sitzung muss der Nutzer den experimentellen
+Sicherheitshinweis bestätigen. Diese Bestätigung steht ausschließlich unter
+`bssmap.dive-plan-warning.v1` in `sessionStorage`; speichere sie nicht dauerhaft
+und umgehe den Dialog auch bei einem direkten Routenlink nicht.
 
 Die Maßstabsdaten stehen nachvollziehbar pro Karte in `data/maps.json`:
 
@@ -464,8 +468,11 @@ Führe zusätzlich einen Browser-Smoke-Test über einen lokalen HTTP-Server durc
    Anfrage an `/api` erfolgt.
 10. Im Servermodus als `editor` anmelden, Beschreibung ändern, Foto hochladen,
     Galerie prüfen, Foto löschen und abmelden.
-11. Planer öffnen, Einstieg und mehrere Objekte anklicken, Wegpunkte umsortieren,
-    Aufenthaltszeit setzen und die nummerierte Route auf der Karte prüfen.
+11. Planer öffnen, Warnhinweis zunächst abbrechen und danach bestätigen. Prüfen,
+    dass er im selben Tab nicht erneut, in einer neuen Browser-Sitzung aber
+    wieder erscheint. Anschließend Einstieg und mehrere Objekte anklicken,
+    Wegpunkte umsortieren, Aufenthaltszeit setzen und die nummerierte Route auf
+    der Karte prüfen.
 12. Geschwindigkeiten, RMV, Flaschenvolumen, Start- und Reservedruck ändern und
     Zeit-, Tiefen-, Gas- und Druckwerte auf plausible Aktualisierung prüfen.
 13. Route auf beiden Karten, mit doppeltem Einstieg, nach einem Reload sowie
