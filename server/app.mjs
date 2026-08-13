@@ -14,7 +14,14 @@ const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60;
 const SESSION_COOKIE = "bssmap_session";
 const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._-]{2,63}$/i;
 const OBJECT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const PUBLIC_FILES = new Set(["/", "/index.html", "/styles.css", "/viewer.js"]);
+const PUBLIC_FILES = new Set([
+  "/",
+  "/index.html",
+  "/styles.css",
+  "/viewer.js",
+  "/planner.js",
+  "/planning-calculations.js"
+]);
 const PUBLIC_DIRECTORIES = ["/data/", "/images/", "/maps/", "/vendor/"];
 
 const MIME_TYPES = new Map([

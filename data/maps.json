@@ -8,6 +8,13 @@
       "tileSource": "maps/object-map/map.dzi",
       "width": 5750,
       "height": 8117,
+      "metersPerPixel": 0.0888888889,
+      "scaleCalibration": {
+        "method": "scale-bar",
+        "referencePixels": 1125,
+        "referenceMeters": 100,
+        "description": "Eingezeichneter Maßstabsbalken 0 bis 100 m"
+      },
       "defaultView": {
         "x": 0,
         "y": 0,
@@ -21,6 +28,13 @@
       "tileSource": "maps/detail-map/map.dzi",
       "width": 7997,
       "height": 11414,
+      "metersPerPixel": 0.0635,
+      "scaleCalibration": {
+        "method": "grid",
+        "referencePixels": 157.480315,
+        "referenceMeters": 10,
+        "description": "Rasterabstand 10 m bei 400 dpi"
+      },
       "defaultView": {
         "x": 0,
         "y": 0,

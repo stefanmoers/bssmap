@@ -34,6 +34,9 @@ Die wichtigsten Nutzerfunktionen sind:
 - direkte Links über `?map=<id>&object=<id>` verwenden
 - kartenspezifische Objektkoordinaten lokal über `?edit=1` erfassen
 - Vollbild- und Navigatoransicht nutzen
+- Tauchziele als geordnete Route mit Aufenthaltszeiten zusammenstellen
+- Distanz, Laufzeit, Tiefenprofil und optionalen OC-Gasverbrauch abschätzen
+- geplante Routen lokal speichern und über `?route=<id,id,...>` teilen
 
 ## Aktueller Stand
 
@@ -54,6 +57,9 @@ Zum Zeitpunkt der Aktualisierung sind zwei Karten umgesetzt:
 - optionaler Redaktionsserver unter `server/`
 - persistente Serverdaten unter dem nicht versionierten Verzeichnis `var/`
 - statische Laufzeitkonfiguration: `runtime-config.json`
+- Meterkalibrierung: Objektkarte 0,0888888889 m/Pixel, Detailkarte 0,0635 m/Pixel
+- statischer Tauchgangsplaner mit Routen-, Zeit-, Tiefen- und einfacher
+  OC-Gasberechnung
 
 Verlasse dich bei automatisch prüfbaren Zahlen nicht ausschließlich auf diesen
 Text. `npm test` und die tatsächlich vorhandenen Daten sind die maßgebliche
@@ -127,6 +133,8 @@ Das Projekt verwendet bewusst wenige Bausteine:
 - `index.html`: semantische Struktur und Bedienelemente
 - `styles.css`: responsive Gestaltung, Marker und Dialoge
 - `viewer.js`: OpenSeadragon, Mehrkarten-Zustand, History und UI-Verhalten
+- `planner.js`: Planerzustand, responsive UI, Routenoverlay und localStorage
+- `planning-calculations.js`: reine Distanz-, Zeit-, Tiefen- und Gasfunktionen
 - `data/maps.json`: Kartendefinitionen und Standardansichten
 - `data/objects.json`: Objektmetadaten, Koordinaten und Fotoreferenzen
 - `images/objects/`: Unterwasserfotos
@@ -140,6 +148,7 @@ Das Projekt verwendet bewusst wenige Bausteine:
 - `server/database.mjs`: SQLite-Schema und Datenbankinitialisierung
 - `server/security.mjs`: Passwort-Hashing und sichere Zufallstoken
 - `server/manage-users.mjs`: lokale Benutzerverwaltung
+- `server/test/planning-calculations.test.mjs`: Unit-Tests des Planungsmodells
 - `Dockerfile` und `compose.yaml`: optionales reproduzierbares Deployment
 
 Die Website verwendet Vanilla-HTML, -CSS und -JavaScript. Führe kein Frontend-
@@ -251,6 +260,59 @@ Das aktuelle Schema sieht vereinfacht so aus:
   auslösen.
 - Ein ausgewähltes Objekt wird in der Karte fokussiert und in der Detailansicht
   angezeigt.
+
+### Tauchgangsplaner
+
+Der Planer ist eine statische Browserfunktion und darf nicht vom optionalen
+Node-Server abhängen. Seine Route besteht aus stabilen Objekt-IDs; dasselbe
+Objekt kann mehrfach vorkommen. Einstellungen und Aufenthaltszeiten werden
+unter `bssmap.dive-plan.v1` in `localStorage` gespeichert. Ein Routenlink
+enthält nur Karten-ID und geordnete Objekt-IDs, keine persönlichen Gaswerte.
+
+Die Maßstabsdaten stehen nachvollziehbar pro Karte in `data/maps.json`:
+
+```json
+{
+  "metersPerPixel": 0.0635,
+  "scaleCalibration": {
+    "method": "grid",
+    "referencePixels": 157.480315,
+    "referenceMeters": 10,
+    "description": "Rasterabstand 10 m bei 400 dpi"
+  }
+}
+```
+
+- Erfinde oder ändere keine Kartenkalibrierung ohne messbare Referenz in der
+  Kartenquelle und dokumentiere Quelle sowie Messwerte.
+- Berechne geometrische Distanzen in Bildkoordinaten und multipliziere erst
+  danach mit `metersPerPixel`.
+- Verbinde Wegpunkte in der ersten Ausbaustufe geradlinig. Stelle dies nicht
+  als bestätigte Führungsleine, freie Passage oder tatsächlichen Schwimmweg dar.
+- Behandle ausschließlich das Objekt mit Kategorie beziehungsweise ID
+  `Einstieg` als Oberflächenpunkt mit 0 m, wenn `depthMeters` dort `null` ist.
+  Andere fehlende Tiefen müssen eine vollständige Zeit- und Gasprognose
+  verhindern.
+- Die Segmentzeit ist das Maximum aus horizontaler Reisezeit und der für den
+  Tiefenwechsel nötigen Auf- oder Abstiegszeit. Tiefen werden zwischen
+  Wegpunkten linear interpoliert.
+- Berechne Gas segmentweise aus RMV, Zeit und Süßwasser-Druckfaktor
+  `1 + Tiefe / 10.3`. Verwende intern auf Oberflächendruck bezogene Liter und
+  leite den Druckverlust erst durch Division durch das gesamte
+  Flascheninnenvolumen ab.
+- Startdruck und Reservedruck bleiben getrennte Eingaben. Eine Reserve ist
+  keine für die geplante Route verfügbare Gasmenge.
+- Zeige negative Reserveabstände und unvollständige Daten deutlich an. Gib
+  keine scheinpräzisen Ersatzwerte aus.
+- Implementiere in diesem einfachen Planer keine Nullzeit-, Gewebesättigungs-
+  oder Dekompressionsberechnung. Entsprechende Modelle wären ein eigenes,
+  sicherheitskritisches Projekt mit separater Validierung.
+- Halte Berechnungen als reine Funktionen in `planning-calculations.js` und
+  sichere Grenzfälle mit Node-Unit-Tests ab. UI-Code gehört nach `planner.js`.
+- Das SVG-Routenoverlay darf Karte und Marker nicht blockieren. Es muss bei
+  Zoom, Pan, Resize und Kartenwechsel aktualisiert werden.
+- Prüfe doppelte Wegpunkte, eine auf der Zielkarte fehlende Position,
+  deaktivierte Gasplanung, ungültige Eingaben und Reserveunterschreitung.
 
 ### Fotos
 
@@ -370,6 +432,9 @@ git diff --check
 `npm test` prüft derzeit:
 
 - JavaScript-Syntax von `viewer.js`
+- JavaScript-Syntax von `planner.js` und `planning-calculations.js`
+- Distanz-, Segmentzeit-, Durchschnittstiefen- und OC-Gasberechnung
+- Verhalten bei fehlenden Tiefen und unterschrittener Reserve
 - Passwort-Hashing und Server-API
 - Anmeldung, Rollen- und CSRF-Schutz
 - Beschreibungsänderung, Bildverarbeitung und Löschen
@@ -380,6 +445,7 @@ git diff --check
 - kartenspezifische Positionen innerhalb der jeweiligen Bildabmessungen
 - referenzierte Fotodateien
 - DZI-Abmessungen beider Karten
+- dokumentierte und rechnerisch konsistente Meterkalibrierung beider Karten
 - Vollständigkeit und Pixelabmessungen beider Kachelpyramiden
 
 Führe zusätzlich einen Browser-Smoke-Test über einen lokalen HTTP-Server durch:
@@ -398,6 +464,13 @@ Führe zusätzlich einen Browser-Smoke-Test über einen lokalen HTTP-Server durc
    Anfrage an `/api` erfolgt.
 10. Im Servermodus als `editor` anmelden, Beschreibung ändern, Foto hochladen,
     Galerie prüfen, Foto löschen und abmelden.
+11. Planer öffnen, Einstieg und mehrere Objekte anklicken, Wegpunkte umsortieren,
+    Aufenthaltszeit setzen und die nummerierte Route auf der Karte prüfen.
+12. Geschwindigkeiten, RMV, Flaschenvolumen, Start- und Reservedruck ändern und
+    Zeit-, Tiefen-, Gas- und Druckwerte auf plausible Aktualisierung prüfen.
+13. Route auf beiden Karten, mit doppeltem Einstieg, nach einem Reload sowie
+    über einen kopierten `route`-Link testen. Fehlende Detailkartenpositionen
+    müssen als unvollständige Planung sichtbar werden.
 
 Prüfe mindestens eine typische Desktopgröße und eine schmale Mobilansicht.
 
@@ -432,6 +505,9 @@ Eine Änderung ist erst abgeschlossen, wenn:
 - `git diff --check` keine Probleme meldet,
 - Dokumentation und Validator zum neuen Verhalten passen,
 - der statische Modus ohne Backend vollständig funktioniert,
+- der Planer auf GitHub Pages ohne API Distanz, Zeit und Gas berechnet,
+- Routenoverlay, Wegpunktreihenfolge, lokale Speicherung und Routenlink auf
+  Desktop und Mobilansicht geprüft wurden,
 - bei Serveränderungen Authentifizierung, Rechte und Uploadgrenzen geprüft
   wurden,
 - keine Koordinaten, Tiefen oder Inhalte ungeprüft erfunden wurden.

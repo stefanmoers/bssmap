@@ -41,6 +41,7 @@
   let visibleObjectById = new Map();
   const markers = new Map();
   const markerTrackers = [];
+  let plannerRouteObjectIds = [];
   let selectedObject = null;
   let selectedPhoto = null;
   let pendingObjectId = null;
@@ -189,6 +190,34 @@
   const setMarkerSelection = (objectId) => {
     markers.forEach((marker, id) => {
       marker.classList.toggle("is-selected", id === objectId);
+    });
+  };
+
+  const setPlannerRouteMarkers = (objectIds = []) => {
+    plannerRouteObjectIds = Array.isArray(objectIds) ? [...objectIds] : [];
+    const routeNumbers = new Map();
+    plannerRouteObjectIds.forEach((objectId, index) => {
+      const numbers = routeNumbers.get(objectId) || [];
+      numbers.push(index + 1);
+      routeNumbers.set(objectId, numbers);
+    });
+    markers.forEach((marker, objectId) => {
+      const numbers = routeNumbers.get(objectId) || [];
+      marker.classList.toggle("is-route-waypoint", numbers.length > 0);
+      let badge = marker.querySelector(".route-order");
+      if (numbers.length > 0) {
+        marker.dataset.routeOrder = numbers.join("/");
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "route-order";
+          badge.setAttribute("aria-hidden", "true");
+          marker.append(badge);
+        }
+        badge.textContent = numbers.join("/");
+      } else {
+        delete marker.dataset.routeOrder;
+        badge?.remove();
+      }
     });
   };
 
@@ -374,6 +403,15 @@
     return true;
   };
 
+  const activateObject = (objectId, options = {}) => {
+    const activation = new CustomEvent("bssmap:object-activate", {
+      cancelable: true,
+      detail: { objectId, source: options.source || "unknown" }
+    });
+    window.dispatchEvent(activation);
+    return activation.defaultPrevented || selectObject(objectId, options);
+  };
+
   const renderObjectList = () => {
     const query = normalize(objectSearch.value.trim());
     const matchingObjects = objects
@@ -401,7 +439,7 @@
       button.querySelector("strong").textContent = object.name;
       button.querySelector(".list-category").textContent = object.category;
       button.querySelector(".list-depth").textContent = formatDepth(object.depthMeters);
-      button.addEventListener("click", () => selectObject(object.id));
+      button.addEventListener("click", () => activateObject(object.id, { source: "list" }));
       objectList.append(button);
     });
   };
@@ -438,7 +476,7 @@
           return;
         }
         event.stopPropagation();
-        selectObject(object.id);
+        activateObject(object.id, { source: "marker-keyboard" });
       });
       marker.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") {
@@ -446,7 +484,7 @@
         }
         event.preventDefault();
         event.stopPropagation();
-        selectObject(object.id);
+        activateObject(object.id, { source: "marker-keyboard" });
       });
 
       const markerTracker = new OpenSeadragon.MouseTracker({
@@ -458,7 +496,7 @@
         },
         clickHandler: (event) => {
           if (event.quick) {
-            selectObject(object.id);
+            activateObject(object.id, { source: "marker" });
           }
         }
       });
@@ -475,6 +513,7 @@
     });
     updateMarkerVisibility();
     setMarkerSelection(selectedObject?.id || null);
+    setPlannerRouteMarkers(plannerRouteObjectIds);
   };
 
   const loadJson = async (url, label) => {
@@ -773,6 +812,30 @@
     });
   };
 
+  const imagePositionToViewerPixel = (position) => {
+    const image = viewer.world.getItemAt(0);
+    if (!image || !position || !Number.isFinite(position.x) || !Number.isFinite(position.y)) {
+      return null;
+    }
+    const viewportPoint = image.imageToViewportCoordinates(position.x, position.y);
+    const pixel = viewer.viewport.pixelFromPoint(viewportPoint, true);
+    return Number.isFinite(pixel.x) && Number.isFinite(pixel.y)
+      ? { x: pixel.x, y: pixel.y }
+      : null;
+  };
+
+  window.BssMapViewer = Object.freeze({
+    closeObjectPanel,
+    getCurrentMap: () => currentMap,
+    getObject: (objectId) => objectById.get(objectId) || null,
+    getObjects: () => [...allObjects],
+    imagePositionToViewerPixel,
+    openObjectBrowser: () => openObjectPanel({ focusSearch: true }),
+    positionForObject: (objectId, mapId = currentMap?.id) => positionFor(objectById.get(objectId), mapId),
+    setPlannerRouteMarkers,
+    showStatus
+  });
+
   byId("zoom-in").addEventListener("click", () => zoomBy(1.45));
   byId("zoom-out").addEventListener("click", () => zoomBy(1 / 1.45));
   byId("home").addEventListener("click", () => goToDefaultView());
@@ -1060,6 +1123,10 @@
     } else {
       showStatus(`${currentMap.name} geladen`, 900);
     }
+    window.dispatchEvent(new CustomEvent("bssmap:map-opened", {
+      detail: { mapId: currentMap.id }
+    }));
+    window.dispatchEvent(new Event("bssmap:viewport-change"));
   });
 
   viewer.addHandler("open-failed", (event) => {
@@ -1071,6 +1138,8 @@
   });
 
   viewer.addHandler("zoom", (event) => updateMarkerAppearance(event.zoom));
+  viewer.addHandler("animation", () => window.dispatchEvent(new Event("bssmap:viewport-change")));
+  viewer.addHandler("resize", () => window.dispatchEvent(new Event("bssmap:viewport-change")));
 
   window.addEventListener("popstate", () => {
     const params = new URLSearchParams(window.location.search);

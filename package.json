@@ -15,7 +15,7 @@
     "user:disable": "node server/manage-users.mjs disable",
     "generate-tiles": "node scripts/generate-tiles.mjs",
     "copy-vendor": "node scripts/copy-vendor.mjs",
-    "test": "node --check viewer.js && node --test server/test/*.test.mjs && node scripts/validate-project.mjs",
+    "test": "node --check viewer.js && node --check planner.js && node --check planning-calculations.js && node --test server/test/*.test.mjs && node scripts/validate-project.mjs",
     "test:server": "node --test server/test/*.test.mjs"
   },
   "dependencies": {

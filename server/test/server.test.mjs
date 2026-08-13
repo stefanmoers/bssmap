@@ -70,6 +70,12 @@ test("Servermodus bietet Authentifizierung, Beschreibungen und Bild-Uploads", as
   assert.equal(staticResponse.status, 200);
   assert.match(await staticResponse.text(), /Tauchplatzkarte Blausteinsee/);
 
+  for (const asset of ["/planner.js", "/planning-calculations.js"]) {
+    const assetResponse = await fetch(`${baseUrl}${asset}`);
+    assert.equal(assetResponse.status, 200);
+    assert.match(assetResponse.headers.get("content-type"), /javascript/);
+  }
+
   const unauthorized = await fetch(`${baseUrl}/api/objects/segelboot`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json", Origin: baseUrl },

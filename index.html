@@ -27,6 +27,7 @@
       <button id="zoom-out" type="button" title="Herauszoomen" aria-label="Herauszoomen">−</button>
       <button id="home" type="button" title="Gesamte Karte anzeigen" aria-label="Gesamte Karte anzeigen">⌂</button>
       <button id="objects-open" type="button" title="Tauchziele öffnen" aria-label="Tauchziele öffnen" aria-expanded="false">◎</button>
+      <button id="planner-open" type="button" title="Tauchgang planen" aria-label="Tauchgang planen" aria-expanded="false">↝</button>
       <button id="server-access" type="button" title="Redaktion öffnen" aria-label="Redaktion öffnen" hidden>✎</button>
       <button id="full-page" type="button" title="Vollbild umschalten" aria-label="Vollbild umschalten" aria-pressed="false">⛶</button>
     </nav>
@@ -110,6 +111,103 @@
       </article>
     </aside>
 
+    <aside id="planner-panel" class="planner-panel" aria-hidden="true" aria-label="Tauchgangsplaner">
+      <header class="panel-header">
+        <div>
+          <span class="eyebrow">Route, Zeit und Gas</span>
+          <h2>Tauchgangsplaner</h2>
+        </div>
+        <button id="planner-close" class="icon-button" type="button" aria-label="Tauchgangsplaner schließen">×</button>
+      </header>
+
+      <div class="planner-content">
+        <p class="planner-intro">Klicke Tauchziele auf der Karte oder in der Objektliste in der gewünschten Reihenfolge an.</p>
+
+        <section class="planner-section" aria-labelledby="planner-route-heading">
+          <div class="planner-section-heading">
+            <h3 id="planner-route-heading">Route</h3>
+            <span id="planner-map-name" class="planner-map-name"></span>
+          </div>
+          <p id="planner-empty" class="planner-empty">Noch keine Wegpunkte gewählt.</p>
+          <ol id="planner-waypoints" class="planner-waypoints" aria-label="Geplante Wegpunkte"></ol>
+          <div class="planner-actions">
+            <button id="planner-choose-object" class="secondary-button" type="button">Tauchzielliste öffnen</button>
+            <button id="planner-reverse" class="secondary-button" type="button">Route umkehren</button>
+            <button id="planner-clear" class="secondary-button" type="button">Leeren</button>
+            <button id="planner-copy-link" class="secondary-button" type="button">Routenlink kopieren</button>
+          </div>
+        </section>
+
+        <form id="planner-settings" class="planner-settings">
+          <fieldset>
+            <legend>Geschwindigkeit</legend>
+            <div class="planner-field-grid">
+              <label for="planner-swim-speed">Horizontal
+                <span><input id="planner-swim-speed" name="swimSpeedMetersPerMinute" type="number" min="1" max="100" step="0.5" value="10" inputmode="decimal"> m/min</span>
+              </label>
+              <label for="planner-descent-speed">Abstieg
+                <span><input id="planner-descent-speed" name="descentSpeedMetersPerMinute" type="number" min="1" max="60" step="0.5" value="15" inputmode="decimal"> m/min</span>
+              </label>
+              <label for="planner-ascent-speed">Aufstieg
+                <span><input id="planner-ascent-speed" name="ascentSpeedMetersPerMinute" type="number" min="1" max="30" step="0.5" value="9" inputmode="decimal"> m/min</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Gasplanung</legend>
+            <label class="planner-gas-toggle">
+              <input id="planner-gas-enabled" name="gasEnabled" type="checkbox" checked>
+              <span>Gasverbrauch und Restdruck berechnen</span>
+            </label>
+            <div id="planner-gas-fields" class="planner-field-grid">
+              <label for="planner-rmv">RMV
+                <span><input id="planner-rmv" name="rmvLitersPerMinute" type="number" min="1" max="200" step="0.5" value="20" inputmode="decimal"> l/min</span>
+              </label>
+              <label for="planner-cylinder-volume">Flaschenvolumen gesamt
+                <span><input id="planner-cylinder-volume" name="cylinderVolumeLiters" type="number" min="1" max="100" step="0.1" value="12" inputmode="decimal"> l</span>
+              </label>
+              <label for="planner-start-pressure">Startdruck
+                <span><input id="planner-start-pressure" name="startPressureBar" type="number" min="1" max="400" step="1" value="200" inputmode="decimal"> bar</span>
+              </label>
+              <label for="planner-reserve-pressure">Reservedruck
+                <span><input id="planner-reserve-pressure" name="reservePressureBar" type="number" min="0" max="399" step="1" value="70" inputmode="decimal"> bar</span>
+              </label>
+            </div>
+          </fieldset>
+        </form>
+
+        <section class="planner-section" aria-labelledby="planner-result-heading">
+          <h3 id="planner-result-heading">Prognose</h3>
+          <dl class="planner-summary">
+            <div><dt>Strecke</dt><dd id="planner-total-distance">–</dd></div>
+            <div><dt>Zeit</dt><dd id="planner-total-time">–</dd></div>
+            <div><dt>Ø Tiefe</dt><dd id="planner-average-depth">–</dd></div>
+            <div><dt>Max. Tiefe</dt><dd id="planner-max-depth">–</dd></div>
+            <div><dt>Gasverbrauch</dt><dd id="planner-gas-used">–</dd></div>
+            <div><dt>Enddruck</dt><dd id="planner-end-pressure">–</dd></div>
+          </dl>
+
+          <figure id="planner-profile-figure" class="planner-profile" hidden>
+            <figcaption>Tiefen- und Druckverlauf über der Laufzeit</figcaption>
+            <svg id="planner-profile" viewBox="0 0 600 230" role="img" aria-label="Geplanter Tiefen- und Druckverlauf">
+              <line class="profile-axis" x1="44" y1="18" x2="44" y2="196"></line>
+              <line class="profile-axis" x1="44" y1="196" x2="580" y2="196"></line>
+              <polyline id="planner-depth-profile" class="profile-depth" points=""></polyline>
+              <polyline id="planner-pressure-profile" class="profile-pressure" points=""></polyline>
+              <text id="planner-profile-depth-label" class="profile-label" x="48" y="32"></text>
+              <text id="planner-profile-pressure-label" class="profile-label profile-label-pressure" x="48" y="49"></text>
+              <text id="planner-profile-time-label" class="profile-label" x="575" y="216" text-anchor="end"></text>
+            </svg>
+          </figure>
+
+          <ul id="planner-issues" class="planner-issues" aria-live="polite"></ul>
+        </section>
+
+        <p class="planner-disclaimer"><strong>Planungshilfe:</strong> Entfernungen, Tiefen, Zeiten und Drücke sind Schätzwerte. Der Planer berechnet keine Nullzeit oder Dekompression und ersetzt weder Ausbildung noch Tauchcomputer, Tabelle oder persönliche Gasreserveplanung.</p>
+      </div>
+    </aside>
+
     <section id="coordinate-editor" class="coordinate-editor" hidden aria-label="Objektkoordinaten erfassen">
       <header>
         <div>
@@ -174,6 +272,8 @@
   </dialog>
 
   <script src="vendor/openseadragon/openseadragon.min.js"></script>
+  <script src="planning-calculations.js"></script>
   <script src="viewer.js"></script>
+  <script src="planner.js"></script>
 </body>
 </html>

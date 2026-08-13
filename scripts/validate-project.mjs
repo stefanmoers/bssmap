@@ -8,6 +8,8 @@ const requiredFiles = [
   "Dockerfile",
   "compose.yaml",
   "index.html",
+  "planner.js",
+  "planning-calculations.js",
   "styles.css",
   "viewer.js",
   "runtime-config.json",
@@ -38,11 +40,16 @@ const requiredIds = [
   "viewer",
   "map-switcher",
   "objects-open",
+  "planner-open",
   "server-access",
   "object-panel",
   "object-search",
   "object-list",
   "object-detail",
+  "planner-panel",
+  "planner-waypoints",
+  "planner-settings",
+  "planner-issues",
   "object-editor-actions",
   "description-form",
   "photo-upload-form",
@@ -167,6 +174,19 @@ for (const map of mapData.maps) {
   if (!Number.isInteger(map.width) || map.width <= 0
       || !Number.isInteger(map.height) || map.height <= 0) {
     throw new Error(`Ungültige Bildgröße für Karte: ${map.id}`);
+  }
+  if (!Number.isFinite(map.metersPerPixel) || map.metersPerPixel <= 0) {
+    throw new Error(`Gültige Meterkalibrierung fehlt für Karte: ${map.id}`);
+  }
+  const calibration = map.scaleCalibration;
+  if (!calibration || !calibration.method || !calibration.description
+      || !Number.isFinite(calibration.referencePixels) || calibration.referencePixels <= 0
+      || !Number.isFinite(calibration.referenceMeters) || calibration.referenceMeters <= 0) {
+    throw new Error(`Nachvollziehbare Maßstabsreferenz fehlt für Karte: ${map.id}`);
+  }
+  const calibratedMetersPerPixel = calibration.referenceMeters / calibration.referencePixels;
+  if (Math.abs(calibratedMetersPerPixel - map.metersPerPixel) > 0.000001) {
+    throw new Error(`Meterkalibrierung und Maßstabsreferenz widersprechen sich für Karte: ${map.id}`);
   }
   const view = map.defaultView;
   if (!view || ![view.x, view.y, view.width, view.height].every(Number.isInteger)
